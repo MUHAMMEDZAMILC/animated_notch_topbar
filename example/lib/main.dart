@@ -68,6 +68,7 @@ class _ExampleAppState extends State<ExampleApp> {
                 searchHint: _hints[_index],
                 tabs: _tabs,
                 statusTime: null,
+                validateFourTabs: true,
                 onTabChanged: (i) => setState(() => _index = i),
                 borderRadius: 0,
               ),

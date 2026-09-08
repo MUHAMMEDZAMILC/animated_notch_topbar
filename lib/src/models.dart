@@ -75,6 +75,18 @@ class TopBarTab {
   /// Optional custom widget shown when this tab is selected.
   final Widget? selectedWidget;
 
+  /// Optional background color when this tab is selected (notch cutout fill).
+  final Color? selectedColor;
+
+  /// Optional background color when this tab is unselected.
+  final Color? unselectedColor;
+
+  /// Optional icon/text color when this tab is selected.
+  final Color? selectedItemColor;
+
+  /// Optional icon/text color when this tab is unselected.
+  final Color? unselectedItemColor;
+
   const TopBarTab({
     this.label = '',
     this.sub,
@@ -85,5 +97,9 @@ class TopBarTab {
     this.selectedImage,
     this.unselectedWidget,
     this.selectedWidget,
+    this.selectedColor,
+    this.unselectedColor,
+    this.selectedItemColor,
+    this.unselectedItemColor,
   });
 }

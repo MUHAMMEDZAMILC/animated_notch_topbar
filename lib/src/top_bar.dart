@@ -21,21 +21,103 @@ class AnimatedNotchTopBar extends StatefulWidget {
   /// Called with the new index whenever the user taps a different tab.
   final ValueChanged<int>? onTabChanged;
 
+  /// Optional custom leading widget in the top app bar (e.g. BackButton or Drawer icon).
+  final Widget? leading;
+
+  /// Optional custom title widget in the top app bar.
+  final Widget? title;
+
+  /// Whether the [title] should be centered. Defaults to false.
+  final bool centerTitle;
+
+  /// Optional action widgets displayed on the right of the app bar.
+  final List<Widget>? actions;
+
+  /// App bar background gradient. If null, uses the active tab's [TopBarTheme.gradient].
+  final Gradient? gradient;
+
+  /// App bar background image decoration.
+  final DecorationImage? backgroundImage;
+
+  /// App bar background image path or URL.
+  final String? backgroundImageUrl;
+
+  /// Solid app bar background color (used if no gradient or image specified).
+  final Color? backgroundColor;
+
+  /// Fill color for the notch cutout and active tab background.
+  /// Falls back to active tab's [TopBarTab.selectedColor] or [TopBarTheme.pageBackground].
+  final Color? selectedWidgetColor;
+
+  /// Background color for unselected tabs.
+  /// Falls back to tab's [TopBarTab.unselectedColor] or brand color / white.
+  final Color? unselectedColor;
+
+  /// Color for active tab text/icon.
+  final Color? selectedItemColor;
+
+  /// Color for inactive tab text/icon.
+  final Color? unselectedItemColor;
+
+  /// Height of the tab cards. Defaults to 46.92.
+  final double tabHeight;
+
+  /// Height of the sliding notch cutout. Defaults to 56.92.
+  final double notchHeight;
+
+  /// Gap between tab items and horizontal padding. Defaults to 11.0.
+  final double tabGap;
+
+  /// Corner radius of the notch cutout curves. Defaults to 9.62.
+  final double notchCornerRadius;
+
+  /// Corner radius of the tab cards. Defaults to 9.62.
+  final double tabBorderRadius;
+
+  /// Whether to strictly validate that [tabs] has exactly 4 items.
+  final bool validateFourTabs;
+
+  /// Greeting name string displayed if [title] is not provided.
   final String greetingName;
+
+  /// Location subtitle string displayed if [title] is not provided.
   final String locationLabel;
+
+  /// Callback when the location label is tapped.
   final VoidCallback? onLocationTap;
+
+  /// Callback when the default bell action is tapped.
   final VoidCallback? onBellTap;
+
+  /// Custom search bar widget replacing the default search input.
+  final Widget? searchBar;
 
   /// Set to null to hide the search field entirely.
   final String? searchHint;
+
+  /// Callback when search field is tapped.
   final VoidCallback? onSearchTap;
 
   /// Clock text shown at the top-left of the status bar row.
-  /// Pass null to hide the status bar row entirely.
+  /// Pass null to use device status bar or hide status bar row.
   final String? statusTime;
 
+  /// Optional custom status bar widget.
+  final Widget? statusBar;
+
+  /// Whether to show the decorative balloon illustration (if null, uses active theme).
+  final bool? showBalloon;
+
+  /// Custom decorative widget replacing the default balloon illustration.
+  final Widget? balloonWidget;
+
+  /// Duration of the notch sliding shape animation.
   final Duration shapeAnimationDuration;
+
+  /// Duration of the gradient / color transition animations.
   final Duration themeAnimationDuration;
+
+  /// Outer border radius of the entire top bar container. Defaults to 36 (or 0 for edge-to-edge).
   final double borderRadius;
 
   const AnimatedNotchTopBar({
@@ -43,17 +125,43 @@ class AnimatedNotchTopBar extends StatefulWidget {
     required this.tabs,
     this.initialIndex = 0,
     this.onTabChanged,
+    this.leading,
+    this.title,
+    this.centerTitle = false,
+    this.actions,
+    this.gradient,
+    this.backgroundImage,
+    this.backgroundImageUrl,
+    this.backgroundColor,
+    this.selectedWidgetColor,
+    this.unselectedColor,
+    this.selectedItemColor,
+    this.unselectedItemColor,
+    this.tabHeight = 46.92,
+    this.notchHeight = 56.92,
+    this.tabGap = 11,
+    this.notchCornerRadius = 9.62,
+    this.tabBorderRadius = 9.62,
+    this.validateFourTabs = false,
     this.greetingName = '',
     this.locationLabel = '',
     this.onLocationTap,
     this.onBellTap,
+    this.searchBar,
     this.searchHint = 'Search',
     this.onSearchTap,
     this.statusTime = '9:41',
+    this.statusBar,
+    this.showBalloon,
+    this.balloonWidget,
     this.shapeAnimationDuration = const Duration(milliseconds: 400),
     this.themeAnimationDuration = const Duration(milliseconds: 450),
     this.borderRadius = 36,
-  }) : assert(tabs.length > 0, 'AnimatedNotchTopBar needs at least one tab');
+  })  : assert(tabs.length > 0, 'AnimatedNotchTopBar needs at least one tab'),
+        assert(
+          !validateFourTabs || tabs.length == 4,
+          'AnimatedNotchTopBar requires exactly 4 tabs when validateFourTabs is true',
+        );
 
   @override
   State<AnimatedNotchTopBar> createState() => _AnimatedNotchTopBarState();
@@ -61,10 +169,6 @@ class AnimatedNotchTopBar extends StatefulWidget {
 
 class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
   static const double _kShapeWidth = 89.02;
-  static const double _kShapeHeight = 56.92;
-  static const double _kTabHeight = 46.92;
-  static const double _kTabGap = 11;
-  static const double _kTabbarHPad = _kTabGap;
 
   late int activeIndex = widget.initialIndex;
 
@@ -135,7 +239,10 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildHeader(theme),
-              if (widget.searchHint != null) _buildSearchBar(theme),
+              if (widget.searchBar != null)
+                widget.searchBar!
+              else if (widget.searchHint != null)
+                _buildSearchBar(theme),
             ],
           ),
         );
@@ -144,6 +251,7 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
   }
 
   Widget _buildStatusBar(TopBarTheme theme) {
+    if (widget.statusBar != null) return widget.statusBar!;
     final color =
         theme.useDarkForeground ? const Color(0xFF26311F) : Colors.white;
     return AnimatedDefaultTextStyle(
@@ -162,20 +270,43 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     );
   }
 
+  DecorationImage? _resolveBackgroundImage() {
+    if (widget.backgroundImage != null) return widget.backgroundImage;
+    if (widget.backgroundImageUrl != null &&
+        widget.backgroundImageUrl!.isNotEmpty) {
+      final url = widget.backgroundImageUrl!;
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return DecorationImage(image: NetworkImage(url), fit: BoxFit.cover);
+      }
+      return DecorationImage(image: AssetImage(url), fit: BoxFit.cover);
+    }
+    return null;
+  }
+
   Widget _buildHeader(TopBarTheme theme) {
     final topPadding = MediaQuery.paddingOf(context).top;
     final effectiveTopPadding = widget.statusTime != null
         ? 4.0
         : (topPadding > 0 ? topPadding + 6 : 14.0);
 
+    final bgImage = _resolveBackgroundImage();
+    final gradient = widget.gradient ??
+        (widget.backgroundColor == null && bgImage == null
+            ? LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: theme.gradient,
+              )
+            : null);
+
+    final showBalloon = widget.showBalloon ?? theme.showBalloon;
+
     return AnimatedContainer(
       duration: widget.themeAnimationDuration,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: theme.gradient,
-        ),
+        color: widget.backgroundColor,
+        image: bgImage,
+        gradient: gradient,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -185,78 +316,25 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (widget.statusTime != null) _buildStatusBar(theme),
+                if (widget.statusTime != null || widget.statusBar != null)
+                  _buildStatusBar(theme),
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    Positioned(
-                      top: -18,
-                      right: -6,
-                      child: AnimatedOpacity(
-                        duration: widget.themeAnimationDuration,
-                        opacity: theme.showBalloon ? 1 : 0,
-                        child: const BalloonIcon(width: 78),
+                    if (showBalloon)
+                      Positioned(
+                        top: -18,
+                        right: -6,
+                        child: AnimatedOpacity(
+                          duration: widget.themeAnimationDuration,
+                          opacity: 1,
+                          child: widget.balloonWidget ??
+                              const BalloonIcon(width: 78),
+                        ),
                       ),
-                    ),
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: widget.onLocationTap,
-                              behavior: HitTestBehavior.opaque,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (widget.greetingName.isNotEmpty)
-                                    AnimatedDefaultTextStyle(
-                                      duration: widget.themeAnimationDuration,
-                                      style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w700,
-                                        color: theme.useDarkForeground
-                                            ? const Color(0xFF26311F)
-                                            : Colors.white,
-                                      ),
-                                      child:
-                                          Text('Hi, ${widget.greetingName} 👋'),
-                                    ),
-                                  const SizedBox(height: 4),
-                                  if (widget.locationLabel.isNotEmpty)
-                                    AnimatedDefaultTextStyle(
-                                      duration: widget.themeAnimationDuration,
-                                      style: TextStyle(
-                                        fontSize: 12.5,
-                                        color: theme.useDarkForeground
-                                            ? const Color(0xB01E2814)
-                                            : const Color(0xE6FFFFFF),
-                                      ),
-                                      child:
-                                          Text('📍 ${widget.locationLabel} ⌄'),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: widget.onBellTap,
-                            child: Container(
-                              width: 34,
-                              height: 34,
-                              decoration: const BoxDecoration(
-                                color: Color(0xE6FFFFFF),
-                                shape: BoxShape.circle,
-                              ),
-                              alignment: Alignment.center,
-                              child: const Text('🔔',
-                                  style: TextStyle(fontSize: 16)),
-                            ),
-                          ),
-                        ],
-                      ),
+                      child: _buildAppBarContent(theme),
                     ),
                   ],
                 ),
@@ -269,9 +347,105 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     );
   }
 
+  Widget _buildAppBarContent(TopBarTheme theme) {
+    if (widget.title != null ||
+        widget.leading != null ||
+        widget.actions != null) {
+      return NavigationToolbar(
+        leading: widget.leading,
+        middle: widget.title,
+        trailing: widget.actions != null
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: widget.actions!,
+              )
+            : (widget.onBellTap != null
+                ? _buildBellButton()
+                : null),
+        centerMiddle: widget.centerTitle == true,
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        if (widget.leading != null) ...[
+          widget.leading!,
+          const SizedBox(width: 12),
+        ],
+        Expanded(
+          child: GestureDetector(
+            onTap: widget.onLocationTap,
+            behavior: HitTestBehavior.opaque,
+            child: Column(
+              crossAxisAlignment: (widget.centerTitle == true)
+                  ? CrossAxisAlignment.center
+                  : CrossAxisAlignment.start,
+              children: [
+                if (widget.greetingName.isNotEmpty)
+                  AnimatedDefaultTextStyle(
+                    duration: widget.themeAnimationDuration,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: theme.useDarkForeground
+                          ? const Color(0xFF26311F)
+                          : Colors.white,
+                    ),
+                    child: Text('Hi, ${widget.greetingName} 👋'),
+                  ),
+                const SizedBox(height: 4),
+                if (widget.locationLabel.isNotEmpty)
+                  AnimatedDefaultTextStyle(
+                    duration: widget.themeAnimationDuration,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: theme.useDarkForeground
+                          ? const Color(0xB01E2814)
+                          : const Color(0xE6FFFFFF),
+                    ),
+                    child: Text('📍 ${widget.locationLabel} ⌄'),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        if (widget.actions != null)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: widget.actions!,
+          )
+        else
+          _buildBellButton(),
+      ],
+    );
+  }
+
+  Widget _buildBellButton() {
+    return GestureDetector(
+      onTap: widget.onBellTap,
+      child: Container(
+        width: 34,
+        height: 34,
+        decoration: const BoxDecoration(
+          color: Color(0xE6FFFFFF),
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: const Text('🔔', style: TextStyle(fontSize: 16)),
+      ),
+    );
+  }
+
   Widget _buildTabbar(TopBarTheme theme) {
+    final activeTab = widget.tabs[activeIndex];
+    final notchColor = activeTab.selectedColor ??
+        widget.selectedWidgetColor ??
+        theme.pageBackground;
+
     return SizedBox(
-      height: _kShapeHeight,
+      height: widget.notchHeight,
       child: Stack(
         key: _tabbarKey,
         clipBehavior: Clip.none,
@@ -280,22 +454,26 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
             duration: widget.shapeAnimationDuration,
             curve: Curves.easeInOut,
             top: 0,
-            left: _measuredOnce ? _shapeLeft : _kTabGap,
+            left: _measuredOnce ? _shapeLeft : widget.tabGap,
             width: _measuredOnce ? _shapeWidth : _kShapeWidth,
-            height: _kShapeHeight,
+            height: widget.notchHeight,
             child: CustomPaint(
-              painter: NotchPainter(color: theme.pageBackground),
+              painter: NotchPainter(
+                color: notchColor,
+                cornerRadius: widget.notchCornerRadius,
+              ),
               child: SizedBox(
-                  width: _measuredOnce ? _shapeWidth : _kShapeWidth,
-                  height: _kShapeHeight),
+                width: _measuredOnce ? _shapeWidth : _kShapeWidth,
+                height: widget.notchHeight,
+              ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: _kTabGap),
+            padding: EdgeInsets.symmetric(horizontal: widget.tabGap),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: List.generate(widget.tabs.length * 2 - 1, (i) {
-                if (i.isOdd) return const SizedBox(width: _kTabGap);
+                if (i.isOdd) return SizedBox(width: widget.tabGap);
                 final index = i ~/ 2;
                 return Expanded(child: _buildTab(index));
               }),
@@ -319,7 +497,7 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
           child: _buildImage(
             tab.selectedImage!,
             fit: BoxFit.contain,
-            height: _kTabHeight * 0.65,
+            height: widget.tabHeight * 0.65,
           ),
         );
       } else {
@@ -332,7 +510,7 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
           tab.unselectedImage!.isNotEmpty) {
         content = SizedBox.expand(
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(9.62),
+            borderRadius: BorderRadius.circular(widget.tabBorderRadius),
             child: _buildImage(
               tab.unselectedImage!,
               fit: BoxFit.cover,
@@ -344,30 +522,33 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
       }
     }
 
+    final unselectedBg = tab.unselectedColor ??
+        widget.unselectedColor ??
+        (tab.useBrandColor ? tab.brandColor : Colors.white);
+
     return AnimatedContainer(
       key: _tabKeys[index],
       duration: widget.shapeAnimationDuration,
       curve: Curves.easeInOut,
-      height: _kTabHeight,
+      height: widget.tabHeight,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: isActive
-            ? Colors.transparent
-            : (tab.useBrandColor ? tab.brandColor : Colors.white),
-        borderRadius: BorderRadius.circular(9.62),
+        color: isActive ? Colors.transparent : unselectedBg,
+        borderRadius: BorderRadius.circular(widget.tabBorderRadius),
         boxShadow: isActive
             ? null
             : const [
                 BoxShadow(
-                    color: Color(0x14000000),
-                    blurRadius: 10,
-                    offset: Offset(0, 4)),
+                  color: Color(0x14000000),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
               ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(9.62),
+          borderRadius: BorderRadius.circular(widget.tabBorderRadius),
           onTap: () => _selectTab(index),
           child: SizedBox.expand(
             child: Center(
@@ -383,6 +564,13 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     if (tab.label.isEmpty && tab.sub == null) {
       return const SizedBox.shrink();
     }
+    final activeTextColor = tab.selectedItemColor ??
+        widget.selectedItemColor ??
+        Colors.black;
+    final inactiveTextColor = tab.unselectedItemColor ??
+        widget.unselectedItemColor ??
+        (tab.useBrandColor ? Colors.white : const Color(0xFF1C1C1C));
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -393,11 +581,7 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
               fontSize: 10,
               fontWeight: FontWeight.bold,
               letterSpacing: -0.1,
-              color: isActive
-                  ? Colors.black
-                  : (tab.useBrandColor
-                      ? Colors.white
-                      : const Color(0xFF1C1C1C)),
+              color: isActive ? activeTextColor : inactiveTextColor,
             ),
           ),
         if (tab.sub != null)
@@ -407,7 +591,7 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
               fontSize: 8,
               fontWeight: FontWeight.w600,
               color: isActive
-                  ? const Color(0xFF1C1C1C)
+                  ? activeTextColor.withOpacity(0.85)
                   : const Color(0xFF8A8A8A),
             ),
           ),
