@@ -73,6 +73,7 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
   final GlobalKey _tabbarKey = GlobalKey();
 
   double _shapeLeft = 0;
+  double _shapeWidth = _kShapeWidth;
   bool _measuredOnce = false;
 
   @override
@@ -95,17 +96,17 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     if (!mounted) return;
     final tabbarBox =
         _tabbarKey.currentContext?.findRenderObject() as RenderBox?;
-    final activeBox = _tabKeys[activeIndex].currentContext?.findRenderObject()
-        as RenderBox?;
+    final activeBox =
+        _tabKeys[activeIndex].currentContext?.findRenderObject() as RenderBox?;
     if (tabbarBox == null || activeBox == null) return;
 
     final tabWidth = activeBox.size.width;
-    final centerOffset = (_kShapeWidth - tabWidth) / 2;
     final activeTopLeft =
         activeBox.localToGlobal(Offset.zero, ancestor: tabbarBox);
 
     setState(() {
-      _shapeLeft = activeTopLeft.dx - centerOffset;
+      _shapeLeft = activeTopLeft.dx;
+      _shapeWidth = tabWidth;
       _measuredOnce = true;
     });
   }
@@ -124,7 +125,6 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     return LayoutBuilder(
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
-
         return Container(
           decoration: BoxDecoration(
             color: theme.pageBackground,
@@ -134,9 +134,7 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (widget.statusTime != null) _buildStatusBar(theme),
               _buildHeader(theme),
-              _buildTabbar(theme),
               if (widget.searchHint != null) _buildSearchBar(theme),
             ],
           ),
@@ -150,10 +148,9 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
         theme.useDarkForeground ? const Color(0xFF26311F) : Colors.white;
     return AnimatedDefaultTextStyle(
       duration: widget.themeAnimationDuration,
-      style:
-          TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600),
+      style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(22, 14, 22, 6),
+        padding: const EdgeInsets.fromLTRB(2, 4, 2, 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -166,9 +163,13 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
   }
 
   Widget _buildHeader(TopBarTheme theme) {
+    final topPadding = MediaQuery.paddingOf(context).top;
+    final effectiveTopPadding = widget.statusTime != null
+        ? 4.0
+        : (topPadding > 0 ? topPadding + 6 : 14.0);
+
     return AnimatedContainer(
       duration: widget.themeAnimationDuration,
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 46),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -176,111 +177,131 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
           colors: theme.gradient,
         ),
       ),
-      child: Stack(
-        clipBehavior: Clip.none,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Positioned(
-            top: -18,
-            right: -6,
-            child: AnimatedOpacity(
-              duration: widget.themeAnimationDuration,
-              opacity: theme.showBalloon ? 1 : 0,
-              child: const BalloonIcon(width: 78),
-            ),
-          ),
           Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            padding: EdgeInsets.fromLTRB(20, effectiveTopPadding, 20, 14),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: widget.onLocationTap,
-                    behavior: HitTestBehavior.opaque,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (widget.greetingName.isNotEmpty)
-                          AnimatedDefaultTextStyle(
-                            duration: widget.themeAnimationDuration,
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                              color: theme.useDarkForeground
-                                  ? const Color(0xFF26311F)
-                                  : Colors.white,
-                            ),
-                            child: Text('Hi, ${widget.greetingName} 👋'),
-                          ),
-                        const SizedBox(height: 4),
-                        if (widget.locationLabel.isNotEmpty)
-                          AnimatedDefaultTextStyle(
-                            duration: widget.themeAnimationDuration,
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              color: theme.useDarkForeground
-                                  ? const Color(0xB01E2814)
-                                  : const Color(0xE6FFFFFF),
-                            ),
-                            child: Text('📍 ${widget.locationLabel} ⌄'),
-                          ),
-                      ],
+                if (widget.statusTime != null) _buildStatusBar(theme),
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned(
+                      top: -18,
+                      right: -6,
+                      child: AnimatedOpacity(
+                        duration: widget.themeAnimationDuration,
+                        opacity: theme.showBalloon ? 1 : 0,
+                        child: const BalloonIcon(width: 78),
+                      ),
                     ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: widget.onBellTap,
-                  child: Container(
-                    width: 34,
-                    height: 34,
-                    decoration: const BoxDecoration(
-                      color: Color(0xE6FFFFFF),
-                      shape: BoxShape.circle,
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: widget.onLocationTap,
+                              behavior: HitTestBehavior.opaque,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (widget.greetingName.isNotEmpty)
+                                    AnimatedDefaultTextStyle(
+                                      duration: widget.themeAnimationDuration,
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w700,
+                                        color: theme.useDarkForeground
+                                            ? const Color(0xFF26311F)
+                                            : Colors.white,
+                                      ),
+                                      child:
+                                          Text('Hi, ${widget.greetingName} 👋'),
+                                    ),
+                                  const SizedBox(height: 4),
+                                  if (widget.locationLabel.isNotEmpty)
+                                    AnimatedDefaultTextStyle(
+                                      duration: widget.themeAnimationDuration,
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        color: theme.useDarkForeground
+                                            ? const Color(0xB01E2814)
+                                            : const Color(0xE6FFFFFF),
+                                      ),
+                                      child:
+                                          Text('📍 ${widget.locationLabel} ⌄'),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: widget.onBellTap,
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: const BoxDecoration(
+                                color: Color(0xE6FFFFFF),
+                                shape: BoxShape.circle,
+                              ),
+                              alignment: Alignment.center,
+                              child: const Text('🔔',
+                                  style: TextStyle(fontSize: 16)),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    alignment: Alignment.center,
-                    child: const Text('🔔', style: TextStyle(fontSize: 16)),
-                  ),
+                  ],
                 ),
               ],
             ),
           ),
+          _buildTabbar(theme),
         ],
       ),
     );
   }
 
   Widget _buildTabbar(TopBarTheme theme) {
-    return Transform.translate(
-      offset: const Offset(0, -34),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: SizedBox(
+        height: _kShapeHeight,
         child: Stack(
           key: _tabbarKey,
           clipBehavior: Clip.none,
           children: [
+            AnimatedPositioned(
+              duration: widget.shapeAnimationDuration,
+              curve: Curves.easeInOut,
+              top: 0,
+              left: _measuredOnce ? _shapeLeft : _kTabbarHPad,
+              width: _measuredOnce ? _shapeWidth : _kShapeWidth,
+              height: _kShapeHeight,
+              child: CustomPaint(
+                painter: NotchPainter(color: theme.pageBackground),
+                child: SizedBox(
+                    width: _measuredOnce ? _shapeWidth : _kShapeWidth,
+                    height: _kShapeHeight),
+              ),
+            ),
             Padding(
               padding:
-                  const EdgeInsets.fromLTRB(_kTabbarHPad, 6, _kTabbarHPad, 10),
+                  const EdgeInsets.fromLTRB(_kTabbarHPad, 0, _kTabbarHPad, 0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children:
-                    List.generate(widget.tabs.length * 2 - 1, (i) {
+                children: List.generate(widget.tabs.length * 2 - 1, (i) {
                   if (i.isOdd) return const SizedBox(width: _kTabGap);
                   final index = i ~/ 2;
                   return Expanded(child: _buildTab(index));
                 }),
-              ),
-            ),
-            AnimatedPositioned(
-              duration: widget.shapeAnimationDuration,
-              curve: Curves.easeInOut,
-              top: 6,
-              left: _measuredOnce ? _shapeLeft : _kTabbarHPad,
-              child: CustomPaint(
-                painter: NotchPainter(color: theme.pageBackground),
-                child: const SizedBox(
-                    width: _kShapeWidth, height: _kShapeHeight),
               ),
             ),
           ],
@@ -293,21 +314,10 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     final tab = widget.tabs[index];
     final isActive = index == activeIndex;
 
-    double marginLeft = 0, marginRight = 0;
-    if (_measuredOnce) {
-      final activeBox = _tabKeys[activeIndex].currentContext?.findRenderObject()
-          as RenderBox?;
-      final offset =
-          activeBox == null ? 0.0 : (_kShapeWidth - activeBox.size.width) / 2;
-      if (index == activeIndex - 1) marginRight = offset;
-      if (index == activeIndex + 1) marginLeft = offset;
-    }
-
     return AnimatedContainer(
       key: _tabKeys[index],
       duration: widget.shapeAnimationDuration,
       curve: Curves.easeInOut,
-      margin: EdgeInsets.only(left: marginLeft, right: marginRight),
       height: _kTabHeight,
       decoration: BoxDecoration(
         color: isActive
@@ -365,33 +375,30 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
   }
 
   Widget _buildSearchBar(TopBarTheme theme) {
-    return Transform.translate(
-      offset: const Offset(0, -34),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
-        color: theme.pageBackground,
-        child: GestureDetector(
-          onTap: widget.onSearchTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: const Color(0xFFECE6DA)),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.search, size: 15, color: Color(0xFF9A9488)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    widget.searchHint!,
-                    style: const TextStyle(
-                        fontSize: 13.5, color: Color(0xFF6B665C)),
-                  ),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+      color: theme.pageBackground,
+      child: GestureDetector(
+        onTap: widget.onSearchTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: const Color(0xFFECE6DA)),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.search, size: 15, color: Color(0xFF9A9488)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  widget.searchHint!,
+                  style: const TextStyle(
+                      fontSize: 13.5, color: Color(0xFF6B665C)),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

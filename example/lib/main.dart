@@ -35,24 +35,23 @@ class _ExampleAppState extends State<ExampleApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.dark,
+        value: _tabs[_index].theme.useDarkForeground
+            ? SystemUiOverlayStyle.dark
+            : SystemUiOverlayStyle.light,
         child: Scaffold(
           backgroundColor: const Color(0xFFFDFAF6),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // ── Top App Bar ──────────────────────────────────────────────
-              SafeArea(
-                bottom: false,
-                child: AnimatedNotchTopBar(
-                  greetingName: 'Dilshad',
-                  locationLabel: 'New York, USA',
-                  searchHint: _hints[_index],
-                  tabs: _tabs,
-                  statusTime: null,
-                  onTabChanged: (i) => setState(() => _index = i),
-                  borderRadius: 0,
-                ),
+              AnimatedNotchTopBar(
+                greetingName: 'Dilshad',
+                locationLabel: 'New York, USA',
+                searchHint: _hints[_index],
+                tabs: _tabs,
+                statusTime: null,
+                onTabChanged: (i) => setState(() => _index = i),
+                borderRadius: 0,
               ),
               // ── Body ─────────────────────────────────────────────────────
               Expanded(

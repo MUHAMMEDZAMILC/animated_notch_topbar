@@ -14,8 +14,10 @@ class NotchPainter extends CustomPainter {
     final r = cornerRadius;
     final paint = Paint()..color = color;
     final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width, 0)
+      ..moveTo(0, r)
+      ..arcToPoint(Offset(r, 0), radius: Radius.circular(r))
+      ..lineTo(size.width - r, 0)
+      ..arcToPoint(Offset(size.width, r), radius: Radius.circular(r))
       ..lineTo(size.width, size.height - r)
       ..arcToPoint(
         Offset(size.width + r, size.height),
