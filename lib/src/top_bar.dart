@@ -64,7 +64,7 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
   static const double _kShapeHeight = 56.92;
   static const double _kTabHeight = 46.92;
   static const double _kTabGap = 11;
-  static const double _kTabbarHPad = 16;
+  static const double _kTabbarHPad = _kTabGap;
 
   late int activeIndex = widget.initialIndex;
 
@@ -270,42 +270,38 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
   }
 
   Widget _buildTabbar(TopBarTheme theme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: SizedBox(
-        height: _kShapeHeight,
-        child: Stack(
-          key: _tabbarKey,
-          clipBehavior: Clip.none,
-          children: [
-            AnimatedPositioned(
-              duration: widget.shapeAnimationDuration,
-              curve: Curves.easeInOut,
-              top: 0,
-              left: _measuredOnce ? _shapeLeft : _kTabbarHPad,
-              width: _measuredOnce ? _shapeWidth : _kShapeWidth,
-              height: _kShapeHeight,
-              child: CustomPaint(
-                painter: NotchPainter(color: theme.pageBackground),
-                child: SizedBox(
-                    width: _measuredOnce ? _shapeWidth : _kShapeWidth,
-                    height: _kShapeHeight),
-              ),
+    return SizedBox(
+      height: _kShapeHeight,
+      child: Stack(
+        key: _tabbarKey,
+        clipBehavior: Clip.none,
+        children: [
+          AnimatedPositioned(
+            duration: widget.shapeAnimationDuration,
+            curve: Curves.easeInOut,
+            top: 0,
+            left: _measuredOnce ? _shapeLeft : _kTabGap,
+            width: _measuredOnce ? _shapeWidth : _kShapeWidth,
+            height: _kShapeHeight,
+            child: CustomPaint(
+              painter: NotchPainter(color: theme.pageBackground),
+              child: SizedBox(
+                  width: _measuredOnce ? _shapeWidth : _kShapeWidth,
+                  height: _kShapeHeight),
             ),
-            Padding(
-              padding:
-                  const EdgeInsets.fromLTRB(_kTabbarHPad, 0, _kTabbarHPad, 0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: List.generate(widget.tabs.length * 2 - 1, (i) {
-                  if (i.isOdd) return const SizedBox(width: _kTabGap);
-                  final index = i ~/ 2;
-                  return Expanded(child: _buildTab(index));
-                }),
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: _kTabGap),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: List.generate(widget.tabs.length * 2 - 1, (i) {
+                if (i.isOdd) return const SizedBox(width: _kTabGap);
+                final index = i ~/ 2;
+                return Expanded(child: _buildTab(index));
+              }),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
