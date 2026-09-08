@@ -18,14 +18,32 @@ class _ExampleAppState extends State<ExampleApp> {
   int _index = 0;
 
   static const _tabs = [
-    TopBarTab(label: 'COFFEE LABS', theme: TopBarTheme.green),
+    TopBarTab(
+      label: 'COFFEE LABS',
+      theme: TopBarTheme.green,
+      unselectedImage: 'assets/coffee_cover.png',
+      selectedImage: 'assets/coffee_selected.png',
+    ),
     TopBarTab(
       label: 'Super Mall',
       theme: TopBarTheme.purple,
       useBrandColor: true,
+      unselectedImage: 'assets/mall_cover.png',
+      selectedImage: 'assets/mall_selected.png',
     ),
-    TopBarTab(label: '50%', sub: 'OFF ZONE', theme: TopBarTheme.mint),
-    TopBarTab(label: 'Make a Print', theme: TopBarTheme.amber),
+    TopBarTab(
+      label: '50%',
+      sub: 'OFF ZONE',
+      theme: TopBarTheme.mint,
+      unselectedImage: 'assets/offers_cover.png',
+      selectedImage: 'assets/offers_selected.png',
+    ),
+    TopBarTab(
+      label: 'Make a Print',
+      theme: TopBarTheme.amber,
+      unselectedImage: 'assets/print_cover.png',
+      selectedImage: 'assets/print_selected.png',
+    ),
   ];
 
   static const _hints = ['coffees', 'products', 'deals', 'prints'];

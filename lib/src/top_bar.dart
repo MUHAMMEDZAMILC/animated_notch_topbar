@@ -310,11 +310,46 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     final tab = widget.tabs[index];
     final isActive = index == activeIndex;
 
+    Widget content;
+    if (isActive) {
+      if (tab.selectedWidget != null) {
+        content = tab.selectedWidget!;
+      } else if (tab.selectedImage != null && tab.selectedImage!.isNotEmpty) {
+        content = Center(
+          child: _buildImage(
+            tab.selectedImage!,
+            fit: BoxFit.contain,
+            height: _kTabHeight * 0.65,
+          ),
+        );
+      } else {
+        content = _buildDefaultText(tab, isActive: true);
+      }
+    } else {
+      if (tab.unselectedWidget != null) {
+        content = tab.unselectedWidget!;
+      } else if (tab.unselectedImage != null &&
+          tab.unselectedImage!.isNotEmpty) {
+        content = SizedBox.expand(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(9.62),
+            child: _buildImage(
+              tab.unselectedImage!,
+              fit: BoxFit.cover,
+            ),
+          ),
+        );
+      } else {
+        content = _buildDefaultText(tab, isActive: false);
+      }
+    }
+
     return AnimatedContainer(
       key: _tabKeys[index],
       duration: widget.shapeAnimationDuration,
       curve: Curves.easeInOut,
       height: _kTabHeight,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: isActive
             ? Colors.transparent
@@ -334,39 +369,85 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
         child: InkWell(
           borderRadius: BorderRadius.circular(9.62),
           onTap: () => _selectTab(index),
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  tab.label,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.1,
-                    color: isActive
-                        ? Colors.black
-                        : (tab.useBrandColor
-                            ? Colors.white
-                            : const Color(0xFF1C1C1C)),
-                  ),
-                ),
-                if (tab.sub != null)
-                  Text(
-                    tab.sub!,
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.w600,
-                      color: isActive
-                          ? const Color(0xFF1C1C1C)
-                          : const Color(0xFF8A8A8A),
-                    ),
-                  ),
-              ],
+          child: SizedBox.expand(
+            child: Center(
+              child: content,
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDefaultText(TopBarTab tab, {required bool isActive}) {
+    if (tab.label.isEmpty && tab.sub == null) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (tab.label.isNotEmpty)
+          Text(
+            tab.label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.1,
+              color: isActive
+                  ? Colors.black
+                  : (tab.useBrandColor
+                      ? Colors.white
+                      : const Color(0xFF1C1C1C)),
+            ),
+          ),
+        if (tab.sub != null)
+          Text(
+            tab.sub!,
+            style: TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.w600,
+              color: isActive
+                  ? const Color(0xFF1C1C1C)
+                  : const Color(0xFF8A8A8A),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildImage(
+    String pathOrUrl, {
+    required BoxFit fit,
+    double? width,
+    double? height,
+  }) {
+    if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
+      return Image.network(
+        pathOrUrl,
+        fit: fit,
+        width: width,
+        height: height,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(
+            child: SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          );
+        },
+        errorBuilder: (_, __, ___) =>
+            Icon(Icons.image, size: (height ?? 24) * 0.7, color: Colors.grey),
+      );
+    }
+    return Image.asset(
+      pathOrUrl,
+      fit: fit,
+      width: width,
+      height: height,
+      errorBuilder: (_, __, ___) =>
+          Icon(Icons.image, size: (height ?? 24) * 0.7, color: Colors.grey),
     );
   }
 

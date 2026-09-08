@@ -9,10 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:animated_notch_topbar_example/main.dart';
+import 'package:animated_notch_topbar/animated_notch_topbar.dart';
 
 void main() {
   testWidgets('ExampleApp smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const ExampleApp());
-    expect(find.text('COFFEE LABS'), findsOneWidget);
+    expect(find.text('Hi, Dilshad 👋'), findsOneWidget);
+    expect(find.byType(AnimatedNotchTopBar), findsOneWidget);
   });
 }

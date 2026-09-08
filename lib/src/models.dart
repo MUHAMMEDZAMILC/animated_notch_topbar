@@ -46,7 +46,7 @@ class TopBarTheme {
 
 /// A single tab in the [AnimatedNotchTopBar].
 class TopBarTab {
-  /// Main label, shown bold.
+  /// Main label, shown bold when text is rendered.
   final String label;
 
   /// Optional secondary line under [label] (e.g. "OFF ZONE").
@@ -63,11 +63,27 @@ class TopBarTab {
   /// inactive. Defaults to a blue accent.
   final Color brandColor;
 
+  /// Image path or URL displayed when the tab is unselected (rendered with BoxFit.cover).
+  final String? unselectedImage;
+
+  /// Transparent PNG image path or URL displayed when the tab is selected.
+  final String? selectedImage;
+
+  /// Optional custom widget shown when this tab is unselected.
+  final Widget? unselectedWidget;
+
+  /// Optional custom widget shown when this tab is selected.
+  final Widget? selectedWidget;
+
   const TopBarTab({
-    required this.label,
+    this.label = '',
     this.sub,
     required this.theme,
     this.useBrandColor = false,
     this.brandColor = const Color(0xFF2B1FF0),
+    this.unselectedImage,
+    this.selectedImage,
+    this.unselectedWidget,
+    this.selectedWidget,
   });
 }
