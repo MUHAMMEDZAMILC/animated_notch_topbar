@@ -129,7 +129,7 @@ Shared shape used by `tabBackground`, `tabRowBackground`, and `pageBackground`.
 | `colors` | array of `"#RRGGBB"` / `"#AARRGGBB"` | `"solid"`: only `colors[0]` is used. `"gradient"`: all entries used as stops in order (needs ≥2 to visually be a gradient). `"image"`: unused today by rendering, but send a representative color anyway as a forward-compatible fallback. |
 | `angle` | number (degrees, CSS convention) | Gradient direction only. `180` = top → bottom (the only value used in the sample above). `0` = bottom → top, `90` = left → right, `270` = right → left. Ignored for `"solid"`/`"image"`. |
 | `image` | string / `null` | Asset path or URL. Used only when `type: "image"`. |
-| `mediaType` | `"image"` | Must be `"image"` when `type: "image"`. Reserved for future media kinds (e.g. video) — anything else is currently ignored client-side. |
+| `mediaType` | `"image"` \| `"gif"` | Must be `"image"` or `"gif"` when `type: "image"`. Both render identically — `image`'s value is loaded via `Image.network`/`Image.asset`, which decode and animate multi-frame GIFs automatically, so no special-casing is needed for `"gif"` beyond sending it. Reserved for future media kinds (e.g. video) — anything else is currently ignored client-side. |
 
 ### Resolution rule per `type`
 
@@ -137,7 +137,7 @@ Shared shape used by `tabBackground`, `tabRowBackground`, and `pageBackground`.
 |---|---|
 | `"solid"` | Flat color from `colors[0]`. |
 | `"gradient"` | Linear gradient through all of `colors`, direction from `angle`. |
-| `"image"` | The image at `image`, requires `mediaType: "image"` too. |
+| `"image"` | The image at `image` (static or animated GIF), requires `mediaType: "image"` or `"gif"` too. |
 
 ## Notes for backend
 

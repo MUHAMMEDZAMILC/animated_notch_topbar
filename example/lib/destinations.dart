@@ -9,13 +9,16 @@ import 'package:animated_notch_topbar/animated_notch_topbar.dart';
 /// - `'gradient'` — use all of `colors` as stops, direction from `angle`
 ///   (CSS-style degrees; 180 = top-to-bottom).
 /// - `'image'`   — use `image` (asset path or URL); `mediaType` describes
-///   what kind of media `image` points to (only `'image'` supported today).
+///   what kind of media `image` points to. Both `'image'` and `'gif'` are
+///   rendered the same way (via [Image.network]/[Image.asset], which decode
+///   and animate multi-frame GIFs automatically) — `mediaType` is otherwise
+///   informational.
 class TabBackground {
   final String type; // 'solid' | 'gradient' | 'image'
   final List<Color> colors;
   final double angle;
   final String? image;
-  final String? mediaType; // 'image' (only supported kind for now)
+  final String? mediaType; // 'image' | 'gif' (only supported kinds for now)
 
   const TabBackground({
     required this.type,
@@ -37,8 +40,12 @@ class TabBackground {
     );
   }
 
+  static const _supportedMediaTypes = {'image', 'gif'};
+
   bool get hasImage =>
-      type == 'image' && mediaType == 'image' && (image?.isNotEmpty ?? false);
+      type == 'image' &&
+      _supportedMediaTypes.contains(mediaType) &&
+      (image?.isNotEmpty ?? false);
 
   bool get isGradient => type == 'gradient' && colors.length > 1;
 

@@ -492,6 +492,9 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(widget.tabBorderRadius),
+            splashFactory: NoSplash.splashFactory,
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
             onTap: tab.enabled
                 ? () => _selectTab(index)
                 : () => widget.onDisabledTabTap?.call(index),
