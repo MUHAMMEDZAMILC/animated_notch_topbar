@@ -46,8 +46,6 @@ class _ExampleAppState extends State<ExampleApp> {
     ),
   ];
 
-  static const _hints = ['coffees', 'products', 'deals', 'prints'];
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -65,9 +63,7 @@ class _ExampleAppState extends State<ExampleApp> {
               AnimatedNotchTopBar(
                 greetingName: 'Dilshad',
                 locationLabel: 'New York, USA',
-                searchHint: _hints[_index],
                 tabs: _tabs,
-                statusTime: null,
                 validateFourTabs: true,
                 onTabChanged: (i) => setState(() => _index = i),
                 borderRadius: 0,

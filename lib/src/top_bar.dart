@@ -4,8 +4,7 @@ import 'models.dart';
 import 'notch_painter.dart';
 
 /// An animated top app bar with a sliding "notch" pill indicator over
-/// the active tab, per-tab gradient themes, and an optional search
-/// field.
+/// the active tab and per-tab gradient themes.
 ///
 /// Tab spacing is measured live from each tab's actual rendered
 /// width/position (via [GlobalKey]/[RenderBox]) rather than assumed —
@@ -33,16 +32,20 @@ class AnimatedNotchTopBar extends StatefulWidget {
   /// Optional action widgets displayed on the right of the app bar.
   final List<Widget>? actions;
 
-  /// App bar background gradient. If null, uses the active tab's [TopBarTheme.gradient].
+  /// Background gradient for the whole bar (app bar section + tab section).
+  /// If null, uses the active tab's [TopBarTheme.gradient].
   final Gradient? gradient;
 
-  /// App bar background image decoration.
+  /// Background image decoration for the whole bar. Takes precedence over
+  /// [gradient] and [backgroundColor] when set.
   final DecorationImage? backgroundImage;
 
-  /// App bar background image path or URL.
+  /// Background image path or URL for the whole bar. Takes precedence over
+  /// [gradient] and [backgroundColor] when set.
   final String? backgroundImageUrl;
 
-  /// Solid app bar background color (used if no gradient or image specified).
+  /// Solid background color for the whole bar (used if no gradient or image
+  /// specified). Takes precedence over [gradient] when set.
   final Color? backgroundColor;
 
   /// Fill color for the notch cutout and active tab background.
@@ -89,28 +92,6 @@ class AnimatedNotchTopBar extends StatefulWidget {
   /// Callback when the default bell action is tapped.
   final VoidCallback? onBellTap;
 
-  /// Custom search bar widget replacing the default search input.
-  final Widget? searchBar;
-
-  /// Set to null to hide the search field entirely.
-  final String? searchHint;
-
-  /// Callback when search field is tapped.
-  final VoidCallback? onSearchTap;
-
-  /// Clock text shown at the top-left of the status bar row.
-  /// Pass null to use device status bar or hide status bar row.
-  final String? statusTime;
-
-  /// Optional custom status bar widget.
-  final Widget? statusBar;
-
-  /// Whether to show the decorative balloon illustration (if null, uses active theme).
-  final bool? showBalloon;
-
-  /// Custom decorative widget replacing the default balloon illustration.
-  final Widget? balloonWidget;
-
   /// Duration of the notch sliding shape animation.
   final Duration shapeAnimationDuration;
 
@@ -147,13 +128,6 @@ class AnimatedNotchTopBar extends StatefulWidget {
     this.locationLabel = '',
     this.onLocationTap,
     this.onBellTap,
-    this.searchBar,
-    this.searchHint = 'Search',
-    this.onSearchTap,
-    this.statusTime = '9:41',
-    this.statusBar,
-    this.showBalloon,
-    this.balloonWidget,
     this.shapeAnimationDuration = const Duration(milliseconds: 400),
     this.themeAnimationDuration = const Duration(milliseconds: 450),
     this.borderRadius = 36,
@@ -229,9 +203,26 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     return LayoutBuilder(
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
-        return Container(
+
+        final bgImage = _resolveBackgroundImage();
+        final gradient = widget.gradient ??
+            (widget.backgroundColor == null && bgImage == null
+                ? LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: theme.gradient,
+                  )
+                : null);
+
+        return AnimatedContainer(
+          duration: widget.themeAnimationDuration,
           decoration: BoxDecoration(
-            color: theme.pageBackground,
+            color: widget.backgroundColor ??
+                (gradient == null && bgImage == null
+                    ? theme.pageBackground
+                    : null),
+            image: bgImage,
+            gradient: gradient,
             borderRadius: BorderRadius.circular(widget.borderRadius),
           ),
           clipBehavior: Clip.antiAlias,
@@ -239,34 +230,11 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildHeader(theme),
-              if (widget.searchBar != null)
-                widget.searchBar!
-              else if (widget.searchHint != null)
-                _buildSearchBar(theme),
+              _buildTabbar(theme),
             ],
           ),
         );
       },
-    );
-  }
-
-  Widget _buildStatusBar(TopBarTheme theme) {
-    if (widget.statusBar != null) return widget.statusBar!;
-    final color =
-        theme.useDarkForeground ? const Color(0xFF26311F) : Colors.white;
-    return AnimatedDefaultTextStyle(
-      duration: widget.themeAnimationDuration,
-      style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(2, 4, 2, 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(widget.statusTime!),
-            Text('▂▄▆ 5G 🔋', style: TextStyle(fontSize: 12, color: color)),
-          ],
-        ),
-      ),
     );
   }
 
@@ -285,139 +253,89 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
 
   Widget _buildHeader(TopBarTheme theme) {
     final topPadding = MediaQuery.paddingOf(context).top;
-    final effectiveTopPadding = widget.statusTime != null
-        ? 4.0
-        : (topPadding > 0 ? topPadding + 6 : 14.0);
+    final effectiveTopPadding = topPadding > 0 ? topPadding + 6 : 14.0;
 
-    final bgImage = _resolveBackgroundImage();
-    final gradient = widget.gradient ??
-        (widget.backgroundColor == null && bgImage == null
-            ? LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: theme.gradient,
-              )
-            : null);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20, effectiveTopPadding, 20, 14),
+      child: _buildAppBarContent(theme),
+    );
+  }
 
-    final showBalloon = widget.showBalloon ?? theme.showBalloon;
+  /// The effective title widget: [widget.title] if provided, otherwise a
+  /// merged "welcome message + location" widget built from [greetingName]
+  /// and [locationLabel] (or null if neither is set).
+  Widget? _resolveTitle(TopBarTheme theme) {
+    if (widget.title != null) return widget.title;
+    if (widget.greetingName.isEmpty && widget.locationLabel.isEmpty) {
+      return null;
+    }
 
-    return AnimatedContainer(
-      duration: widget.themeAnimationDuration,
-      decoration: BoxDecoration(
-        color: widget.backgroundColor,
-        image: bgImage,
-        gradient: gradient,
-      ),
+    return GestureDetector(
+      onTap: widget.onLocationTap,
+      behavior: HitTestBehavior.opaque,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: (widget.centerTitle == true)
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(20, effectiveTopPadding, 20, 14),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (widget.statusTime != null || widget.statusBar != null)
-                  _buildStatusBar(theme),
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    if (showBalloon)
-                      Positioned(
-                        top: -18,
-                        right: -6,
-                        child: AnimatedOpacity(
-                          duration: widget.themeAnimationDuration,
-                          opacity: 1,
-                          child: widget.balloonWidget ??
-                              const BalloonIcon(width: 78),
-                        ),
-                      ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: _buildAppBarContent(theme),
-                    ),
-                  ],
-                ),
-              ],
+          if (widget.greetingName.isNotEmpty)
+            AnimatedDefaultTextStyle(
+              duration: widget.themeAnimationDuration,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: theme.useDarkForeground
+                    ? const Color(0xFF26311F)
+                    : Colors.white,
+              ),
+              child: Text('Hi, ${widget.greetingName} 👋'),
             ),
-          ),
-          _buildTabbar(theme),
+          if (widget.greetingName.isNotEmpty && widget.locationLabel.isNotEmpty)
+            const SizedBox(height: 4),
+          if (widget.locationLabel.isNotEmpty)
+            AnimatedDefaultTextStyle(
+              duration: widget.themeAnimationDuration,
+              style: TextStyle(
+                fontSize: 12.5,
+                color: theme.useDarkForeground
+                    ? const Color(0xB01E2814)
+                    : const Color(0xE6FFFFFF),
+              ),
+              child: Text('📍 ${widget.locationLabel} ⌄'),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildAppBarContent(TopBarTheme theme) {
-    if (widget.title != null ||
-        widget.leading != null ||
-        widget.actions != null) {
-      return NavigationToolbar(
-        leading: widget.leading,
-        middle: widget.title,
-        trailing: widget.actions != null
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: widget.actions!,
-              )
-            : (widget.onBellTap != null
-                ? _buildBellButton()
-                : null),
-        centerMiddle: widget.centerTitle == true,
+  /// The effective trailing (actions) widget: the [widget.actions] list
+  /// wrapped in a [Row], falling back to the default bell button.
+  Widget _resolveActions() {
+    if (widget.actions != null) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: widget.actions!,
       );
     }
+    return _buildBellButton();
+  }
+
+  Widget _buildAppBarContent(TopBarTheme theme) {
+    final title = _resolveTitle(theme) ?? const SizedBox.shrink();
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         if (widget.leading != null) ...[
           widget.leading!,
           const SizedBox(width: 12),
         ],
         Expanded(
-          child: GestureDetector(
-            onTap: widget.onLocationTap,
-            behavior: HitTestBehavior.opaque,
-            child: Column(
-              crossAxisAlignment: (widget.centerTitle == true)
-                  ? CrossAxisAlignment.center
-                  : CrossAxisAlignment.start,
-              children: [
-                if (widget.greetingName.isNotEmpty)
-                  AnimatedDefaultTextStyle(
-                    duration: widget.themeAnimationDuration,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: theme.useDarkForeground
-                          ? const Color(0xFF26311F)
-                          : Colors.white,
-                    ),
-                    child: Text('Hi, ${widget.greetingName} 👋'),
-                  ),
-                const SizedBox(height: 4),
-                if (widget.locationLabel.isNotEmpty)
-                  AnimatedDefaultTextStyle(
-                    duration: widget.themeAnimationDuration,
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      color: theme.useDarkForeground
-                          ? const Color(0xB01E2814)
-                          : const Color(0xE6FFFFFF),
-                    ),
-                    child: Text('📍 ${widget.locationLabel} ⌄'),
-                  ),
-              ],
-            ),
-          ),
+          child: widget.centerTitle == true ? Center(child: title) : title,
         ),
-        if (widget.actions != null)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: widget.actions!,
-          )
-        else
-          _buildBellButton(),
+        const SizedBox(width: 12),
+        _resolveActions(),
       ],
     );
   }
@@ -635,34 +553,4 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     );
   }
 
-  Widget _buildSearchBar(TopBarTheme theme) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-      color: theme.pageBackground,
-      child: GestureDetector(
-        onTap: widget.onSearchTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: const Color(0xFFECE6DA)),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.search, size: 15, color: Color(0xFF9A9488)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  widget.searchHint!,
-                  style: const TextStyle(
-                      fontSize: 13.5, color: Color(0xFF6B665C)),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
