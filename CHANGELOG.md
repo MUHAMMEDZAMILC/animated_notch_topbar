@@ -1,3 +1,10 @@
+## 0.0.6
+
+- README: fix screenshots not rendering on pub.dev — raw `<img>` HTML
+  tags with relative `src` get stripped by pub.dev's README sanitizer.
+  Switched to Markdown image syntax (`![alt](path)`), which pub.dev
+  rewrites against the `repository` field instead.
+
 ## 0.0.5
 
 - README: add real app screenshots (Home tab, Super Mall tab, coming-soon
