@@ -67,7 +67,8 @@ class TabBackground {
       final provider = url.startsWith('http://') || url.startsWith('https://')
           ? NetworkImage(url)
           : AssetImage(url) as ImageProvider;
-      return BoxDecoration(image: DecorationImage(image: provider, fit: BoxFit.cover));
+      return BoxDecoration(
+          image: DecorationImage(image: provider, fit: BoxFit.cover));
     }
     final gradient = toGradient();
     if (gradient != null) return BoxDecoration(gradient: gradient);
@@ -146,8 +147,10 @@ class Destination {
       tabRowBackground: TabBackground.fromJson(
           json['tabRowBackground'] as Map<String, dynamic>),
       pageBackground: json['pageBackground'] != null
-          ? TabBackground.fromJson(json['pageBackground'] as Map<String, dynamic>)
-          : TabBackground.fromJson(json['tabRowBackground'] as Map<String, dynamic>),
+          ? TabBackground.fromJson(
+              json['pageBackground'] as Map<String, dynamic>)
+          : TabBackground.fromJson(
+              json['tabRowBackground'] as Map<String, dynamic>),
       posterUrl: json['posterUrl'] as String?,
     );
   }

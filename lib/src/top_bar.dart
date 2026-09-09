@@ -510,9 +510,8 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     if (tab.label.isEmpty && tab.sub == null) {
       return const SizedBox.shrink();
     }
-    final activeTextColor = tab.selectedItemColor ??
-        widget.selectedItemColor ??
-        Colors.black;
+    final activeTextColor =
+        tab.selectedItemColor ?? widget.selectedItemColor ?? Colors.black;
     final inactiveTextColor = tab.unselectedItemColor ??
         widget.unselectedItemColor ??
         const Color(0xFF1C1C1C);
@@ -537,7 +536,7 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
               fontSize: 8,
               fontWeight: FontWeight.w600,
               color: isActive
-                  ? activeTextColor.withOpacity(0.85)
+                  ? activeTextColor.withValues(alpha: 0.85)
                   : const Color(0xFF8A8A8A),
             ),
           ),
@@ -580,5 +579,4 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
           Icon(Icons.image, size: (height ?? 24) * 0.7, color: Colors.grey),
     );
   }
-
 }

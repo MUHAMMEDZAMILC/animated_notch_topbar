@@ -24,7 +24,7 @@ const _destinationsApiResponse = '''
       "order": 0,
       "tabBackground": {
         "type": "solid",
-        "colors": ["#6f44dc"],
+        "colors": ["#EFF8E6"],
         "angle": 180,
         "image": null,
         "mediaType": "image"
@@ -202,6 +202,18 @@ class _ExampleAppState extends State<ExampleApp> {
                 color: Color(0xFF1C1C1C),
               ),
             ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  // TODO: navigate to a details/waitlist page for this
+                  // destination.
+                },
+                child: const Text('Learn more'),
+              ),
+            ),
           ],
         ),
       ),
@@ -243,7 +255,8 @@ class _ExampleAppState extends State<ExampleApp> {
               Expanded(
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 450),
-                  decoration: _destinations[_index].pageBackground.toBoxDecoration(),
+                  decoration:
+                      _destinations[_index].pageBackground.toBoxDecoration(),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     transitionBuilder: (child, animation) => FadeTransition(
@@ -252,8 +265,7 @@ class _ExampleAppState extends State<ExampleApp> {
                     ),
                     child: KeyedSubtree(
                       key: ValueKey(activeKey),
-                      child: _bodiesByKey[activeKey] ??
-                          const SizedBox.shrink(),
+                      child: _bodiesByKey[activeKey] ?? const SizedBox.shrink(),
                     ),
                   ),
                 ),

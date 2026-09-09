@@ -1,5 +1,5 @@
-/// An animated top app bar with a sliding notch-style tab indicator,
-/// per-tab gradient themes, and a search field.
+/// An animated top app bar with a sliding notch-style tab indicator
+/// and per-tab gradient themes.
 library animated_notch_topbar;
 
 export 'src/top_bar.dart';

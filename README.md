@@ -1,21 +1,19 @@
 # animated_notch_topbar
 
 An animated top app bar for Flutter with a sliding "notch" pill
-indicator over the active tab, per-tab gradient header themes, a
-decorative balloon accent, and a built-in search field — ported from a
-custom mobile UI design.
-
-![preview](https://via.placeholder.com/380x260.png?text=Screenshot+goes+here)
+indicator over the active tab and per-tab gradient header themes.
 
 ## Features
 
 - Sliding notch-cutout indicator that measures real tab widths at
   layout time, so spacing stays correct at any bar width (no
   hardcoded magic numbers).
-- Per-tab `TopBarTheme` — swap the header gradient, status-bar text
-  color, and an optional balloon illustration when a tab is selected.
-- Optional greeting/location header row, notification bell, and
-  search field, each independently toggleable.
+- Per-tab `TopBarTheme` — swap the header gradient/color/image and
+  foreground color when a tab is selected.
+- Optional greeting/location header row, notification bell, custom
+  `leading`/`title`/`actions`, each independently configurable.
+- Per-tab custom images or widgets for the selected/unselected states.
+- Disabled ("coming soon") tabs with a dedicated tap callback.
 - Fully driven by data — pass any number of `TopBarTab`s.
 
 ## Getting started
@@ -33,14 +31,9 @@ import 'package:animated_notch_topbar/animated_notch_topbar.dart';
 AnimatedNotchTopBar(
   greetingName: 'Dilshad',
   locationLabel: 'Location disabled',
-  searchHint: 'mobiles',
   tabs: const [
     TopBarTab(label: 'COFFEE LABS', theme: TopBarTheme.green),
-    TopBarTab(
-      label: 'Super Mall',
-      theme: TopBarTheme.purple,
-      useBrandColor: true,
-    ),
+    TopBarTab(label: 'Super Mall', theme: TopBarTheme.purple),
     TopBarTab(label: '50%', sub: 'OFF ZONE', theme: TopBarTheme.mint),
     TopBarTab(label: 'Make a Print', theme: TopBarTheme.amber),
   ],
@@ -56,11 +49,10 @@ See `example/lib/main.dart` for a runnable app.
 const myTheme = TopBarTheme(
   gradient: [Color(0xFFFF6B6B), Color(0xFFFFA36B)],
   useDarkForeground: false,
-  showBalloon: false,
 );
 ```
 
 ## Additional information
 
-Issues and PRs welcome at the repository linked in `pubspec.yaml`
-(update that URL to your own fork/repo before publishing).
+Issues and PRs welcome at the
+[repository](https://github.com/MUHAMMEDZAMILC/animated_notch_topbar).
