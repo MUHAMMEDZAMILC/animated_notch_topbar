@@ -222,6 +222,11 @@ class _HomePageState extends State<_HomePage> {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
+                style: FilledButton.styleFrom(
+                  overlayColor: Colors.transparent,
+                ).copyWith(
+                  splashFactory: NoSplash.splashFactory,
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                   // TODO: navigate to a details/waitlist page for this
