@@ -1,3 +1,8 @@
+## 0.0.5
+
+- README: add real app screenshots (Home tab, Super Mall tab, coming-soon
+  bottom sheet) and author contact links (LinkedIn, GitHub).
+
 ## 0.0.4
 
 - Location label now renders with proper `Icons.location_on` /

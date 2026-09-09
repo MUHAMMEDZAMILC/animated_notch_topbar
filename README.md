@@ -3,12 +3,11 @@
 An animated top app bar for Flutter with a sliding "notch" pill
 indicator over the active tab and per-tab gradient header themes.
 
-<!--
-TODO: demo GIF — once doc/demo.gif is added, uncomment:
 <p align="center">
-  <img src="doc/demo.gif" alt="animated_notch_topbar demo" width="320">
+  <img src="doc/screenshot-home.png" alt="Home tab" width="220">
+  <img src="doc/screenshot-super-mall.png" alt="Super Mall tab" width="220">
+  <img src="doc/screenshot-coming-soon.png" alt="Coming soon bottom sheet" width="220">
 </p>
--->
 
 ## Features
 
@@ -29,7 +28,7 @@ TODO: demo GIF — once doc/demo.gif is added, uncomment:
 
 ```yaml
 dependencies:
-  animated_notch_topbar: ^0.0.3
+  animated_notch_topbar: ^0.0.4
 ```
 
 ## Usage
