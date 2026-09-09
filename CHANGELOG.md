@@ -1,3 +1,13 @@
+## 0.0.7
+
+- README: screenshots still didn't render with relative Markdown image
+  paths — pub.dev's sanitizer only allows `<img>` with an absolute
+  `src` and falls back to plain `[alt text]` otherwise (it doesn't
+  rewrite image paths against the `repository` field the way it does
+  for links). Switched to absolute `raw.githubusercontent.com` URLs.
+  Also: the GitHub repository was private, which alone would have
+  made any external image link 404 — it's now public.
+
 ## 0.0.6
 
 - README: fix screenshots not rendering on pub.dev — raw `<img>` HTML

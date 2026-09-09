@@ -3,9 +3,9 @@
 An animated top app bar for Flutter with a sliding "notch" pill
 indicator over the active tab and per-tab gradient header themes.
 
-![Home tab](doc/screenshot-home.png)
-![Super Mall tab](doc/screenshot-super-mall.png)
-![Coming soon bottom sheet](doc/screenshot-coming-soon.png)
+![Home tab](https://raw.githubusercontent.com/MUHAMMEDZAMILC/animated_notch_topbar/main/doc/screenshot-home.png)
+![Super Mall tab](https://raw.githubusercontent.com/MUHAMMEDZAMILC/animated_notch_topbar/main/doc/screenshot-super-mall.png)
+![Coming soon bottom sheet](https://raw.githubusercontent.com/MUHAMMEDZAMILC/animated_notch_topbar/main/doc/screenshot-coming-soon.png)
 
 ## Features
 
