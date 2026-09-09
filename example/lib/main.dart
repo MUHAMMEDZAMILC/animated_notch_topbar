@@ -143,14 +143,30 @@ const _destinationsApiResponse = '''
 // ─────────────────────────────────────────────────────────────────────────────
 // Root App
 // ─────────────────────────────────────────────────────────────────────────────
-class ExampleApp extends StatefulWidget {
+class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
   @override
-  State<ExampleApp> createState() => _ExampleAppState();
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: _HomePage(),
+    );
+  }
 }
 
-class _ExampleAppState extends State<ExampleApp> {
+// The bottom sheet in [_showComingSoonPoster] needs a BuildContext below
+// MaterialApp (for its Navigator/MaterialLocalizations), so this state
+// lives in its own widget nested under MaterialApp rather than in
+// ExampleApp's own State.
+class _HomePage extends StatefulWidget {
+  const _HomePage();
+
+  @override
+  State<_HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<_HomePage> {
   int _index = 0;
 
   // Parsed once from the (simulated) API response above. Each destination's
@@ -231,47 +247,44 @@ class _ExampleAppState extends State<ExampleApp> {
   Widget build(BuildContext context) {
     final activeKey = _destinations[_index].key;
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: _tabs[_index].theme.useDarkForeground
-            ? SystemUiOverlayStyle.dark
-            : SystemUiOverlayStyle.light,
-        child: Scaffold(
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ── Top App Bar ──────────────────────────────────────────────
-              AnimatedNotchTopBar(
-                greetingName: 'Dilshad',
-                locationLabel: 'New York, USA',
-                tabs: _tabs,
-                validateFourTabs: true,
-                onTabChanged: (i) => setState(() => _index = i),
-                onDisabledTabTap: _showComingSoonPoster,
-                borderRadius: 0,
-              ),
-              // ── Body ─────────────────────────────────────────────────────
-              Expanded(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 450),
-                  decoration:
-                      _destinations[_index].pageBackground.toBoxDecoration(),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    transitionBuilder: (child, animation) => FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    ),
-                    child: KeyedSubtree(
-                      key: ValueKey(activeKey),
-                      child: _bodiesByKey[activeKey] ?? const SizedBox.shrink(),
-                    ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: _tabs[_index].theme.useDarkForeground
+          ? SystemUiOverlayStyle.dark
+          : SystemUiOverlayStyle.light,
+      child: Scaffold(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── Top App Bar ──────────────────────────────────────────────
+            AnimatedNotchTopBar(
+              greetingName: 'Dilshad',
+              locationLabel: 'New York, USA',
+              tabs: _tabs,
+              validateFourTabs: true,
+              onTabChanged: (i) => setState(() => _index = i),
+              onDisabledTabTap: _showComingSoonPoster,
+              borderRadius: 0,
+            ),
+            // ── Body ─────────────────────────────────────────────────────
+            Expanded(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 450),
+                decoration:
+                    _destinations[_index].pageBackground.toBoxDecoration(),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  ),
+                  child: KeyedSubtree(
+                    key: ValueKey(activeKey),
+                    child: _bodiesByKey[activeKey] ?? const SizedBox.shrink(),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
