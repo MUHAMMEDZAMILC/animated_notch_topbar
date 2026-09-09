@@ -505,6 +505,8 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
             splashFactory: NoSplash.splashFactory,
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
+            hoverColor: Colors.transparent,
+            focusColor: Colors.transparent,
             onTap: tab.enabled
                 ? () => _selectTab(index)
                 : () => widget.onDisabledTabTap?.call(index),

@@ -54,7 +54,7 @@ const _destinationsApiResponse = '''
       "order": 1,
       "tabBackground": {
         "type": "solid",
-        "colors": ["#FFFFFF"],
+        "colors": ["#F1FBF2"],
         "angle": 180,
         "image": null,
         "mediaType": "image"
@@ -336,7 +336,7 @@ class _CoffeeBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
       children: [
         const _SectionTitle(title: 'Categories'),
         const SizedBox(height: 12),
@@ -557,7 +557,7 @@ class _MallBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
       children: [
         Container(
           padding: const EdgeInsets.all(18),
