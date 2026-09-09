@@ -1,8 +1,144 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:animated_notch_topbar/animated_notch_topbar.dart';
 
+import 'destinations.dart';
+
 void main() => runApp(const ExampleApp());
+
+// Simulates the current API response for this section — see destinations.dart
+// for how each entry's tabBackground/tabRowBackground/isComingSoon map onto
+// AnimatedNotchTopBar's TopBarTab/TopBarTheme.
+const _destinationsApiResponse = '''
+{
+  "destinations": [
+    {
+      "_id": "6a9e7663e0e9afe8f60a8044",
+      "key": "home",
+      "unselectedImage": "assets/coffee_cover.png",
+      "selectedImage": "assets/coffee_selected.png",
+      "isComingSoon": false,
+      "label": "Home",
+      "order": 0,
+      "tabBackground": {
+        "type": "solid",
+        "colors": ["#6f44dc"],
+        "angle": 180,
+        "image": null,
+        "mediaType": "image"
+      },
+      "tabRowBackground": {
+        "type": "solid",
+        "colors": ["#c28fff"],
+        "angle": 180,
+        "image": null,
+        "mediaType": "image"
+      },
+      "pageBackground": {
+        "type": "gradient",
+        "colors": ["#EFF8E6", "#DDEFCB"],
+        "angle": 180,
+        "image": null,
+        "mediaType": "image"
+      }
+    },
+    {
+      "_id": "6a9e7663e0e9afe8f60a8045",
+      "key": "super_mall",
+      "unselectedImage": "assets/mall_cover.png",
+      "selectedImage": "assets/mall_selected.png",
+      "isComingSoon": false,
+      "label": "Super Mall",
+      "order": 1,
+      "tabBackground": {
+        "type": "solid",
+        "colors": ["#FFFFFF"],
+        "angle": 180,
+        "image": null,
+        "mediaType": "image"
+      },
+      "tabRowBackground": {
+        "type": "solid",
+        "colors": ["#FFE8C6"],
+        "angle": 180,
+        "image": null,
+        "mediaType": "image"
+      },
+      "pageBackground": {
+        "type": "solid",
+        "colors": ["#F1FBF2"],
+        "angle": 180,
+        "image": null,
+        "mediaType": "image"
+      }
+    },
+    {
+      "_id": "6a9e7663e0e9afe8f60a8046",
+      "key": "off_zone",
+      "unselectedImage": "assets/offers_cover.png",
+      "selectedImage": "assets/offers_selected.png",
+      "isComingSoon": true,
+      "label": "%Off Zone",
+      "order": 2,
+      "posterUrl": "assets/offers_cover.png",
+      "tabBackground": {
+        "type": "solid",
+        "colors": ["#FFFFFF"],
+        "angle": 180,
+        "image": null,
+        "mediaType": "image"
+      },
+      "tabRowBackground": {
+        "type": "image",
+        "colors": ["#EAF4D8"],
+        "angle": 180,
+        "image": "assets/offers_cover.png",
+        "mediaType": "image"
+      },
+      "pageBackground": {
+        "type": "gradient",
+        "colors": ["#FFFDF6", "#FBF6E4"],
+        "angle": 180,
+        "image": null,
+        "mediaType": "image"
+      }
+    },
+    {
+      "_id": "6a9e7663e0e9afe8f60a8047",
+      "key": "make_a_print",
+      "unselectedImage": "assets/print_cover.png",
+      "selectedImage": "assets/print_selected.png",
+      "isComingSoon": true,
+      "label": "Make a Print",
+      "order": 3,
+      "posterUrl": "assets/print_cover.png",
+      "tabBackground": {
+        "type": "solid",
+        "colors": ["#FFFFFF"],
+        "angle": 180,
+        "image": null,
+        "mediaType": "image"
+      },
+      "tabRowBackground": {
+        "type": "solid",
+        "colors": ["#FFFFFF"],
+        "angle": 180,
+        "image": null,
+        "mediaType": "image"
+      },
+      "pageBackground": {
+        "type": "image",
+        "colors": ["#FDF6EA"],
+        "angle": 180,
+        "image": "assets/print_cover.png",
+        "mediaType": "image"
+      }
+    }
+  ]
+}
+''';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Root App
@@ -17,76 +153,72 @@ class ExampleApp extends StatefulWidget {
 class _ExampleAppState extends State<ExampleApp> {
   int _index = 0;
 
-  // Each tab's theme picks a different background style — gradient or
-  // solid color — to show that the notch (and now the page body below)
-  // always resolves its own color to match, whichever style is used.
-  static const _tabs = [
-    TopBarTab(
-      label: 'COFFEE LABS',
-      theme: TopBarTheme(
-        gradient: [Color(0xFF8FBF9A), Color(0xFFA9D0AF)],
-      ),
-      selectedColor: Color(0xFFEFF8E6),
-      unselectedImage: 'assets/coffee_cover.png',
-      selectedImage: 'assets/coffee_selected.png',
-    ),
-    TopBarTab(
-      label: 'Super Mall',
-      theme: TopBarTheme(
-        backgroundColor: Color.fromARGB(255, 92, 224, 107),
-      ),
-      selectedColor: Color(0xFFF1FBF2),
-      unselectedImage: 'assets/mall_cover.png',
-      selectedImage: 'assets/mall_selected.png',
-    ),
-    TopBarTab(
-      label: '50%',
-      sub: 'OFF ZONE',
-      theme: TopBarTheme(
-        gradient: [Color(0xFFEAF4D8), Color(0xFFD8ECC4)],
-        useDarkForeground: true,
-      ),
-      selectedColor: Color(0xFFFFFDF6),
-      unselectedImage: 'assets/offers_cover.png',
-      selectedImage: 'assets/offers_selected.png',
-    ),
-    TopBarTab(
-      label: 'Make a Print',
-      theme: TopBarTheme(
-        backgroundColor: Color(0xFFF3DDB0),
-        useDarkForeground: true,
-      ),
-      selectedColor: Color(0xFFFDF6EA),
-      unselectedImage: 'assets/print_cover.png',
-      selectedImage: 'assets/print_selected.png',
-    ),
-  ];
+  // Parsed once from the (simulated) API response above. Each destination's
+  // tabRowBackground/tabBackground/isComingSoon drives the corresponding
+  // TopBarTab's theme, notch color, and enabled state — see destinations.dart.
+  late final List<Destination> _destinations = Destination.listFromJson(
+    jsonDecode(_destinationsApiResponse) as Map<String, dynamic>,
+  );
 
-  // Body backgrounds are defined here in the app, independently from the
-  // AnimatedNotchTopBar's own gradient/color/notch — so the page below the
-  // bar can use its own color or gradient per tab instead of automatically
-  // matching the bar.
-  static const _bodyBackgrounds = <BoxDecoration>[
-    BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Color(0xFFEFF8E6), Color(0xFFDDEFCB)],
+  late final List<TopBarTab> _tabs =
+      _destinations.map(destinationToTab).toList();
+
+  // Body content is looked up by destination `key` — the page each
+  // destination shows is app-level and independent of the API response.
+  // Its background, though, comes from the response's `pageBackground`
+  // (see destinations.dart), same as the bar's own colors.
+  static const Map<String, Widget> _bodiesByKey = {
+    'home': _CoffeeBody(),
+    'super_mall': _MallBody(),
+    'off_zone': _OffersBody(),
+    'make_a_print': _PrintBody(),
+  };
+
+  // Tapping a disabled ("coming soon") tab doesn't switch content — it opens
+  // a bottom sheet showing that destination's poster image instead.
+  void _showComingSoonPoster(int index) {
+    final destination = _destinations[index];
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (destination.posterUrl != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: _posterImage(destination.posterUrl!),
+              )
+            else
+              const Icon(Icons.hourglass_top_rounded, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              '${destination.label} is coming soon!',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1C1C1C),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-    BoxDecoration(color: Color(0xFFF1FBF2)),
-    BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Color(0xFFFFFDF6), Color(0xFFFBF6E4)],
-      ),
-    ),
-    BoxDecoration(color: Color(0xFFFDF6EA)),
-  ];
+    );
+  }
+
+  Widget _posterImage(String url) {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return Image.network(url, fit: BoxFit.cover);
+    }
+    return Image.asset(url, fit: BoxFit.cover);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final activeKey = _destinations[_index].key;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -104,16 +236,14 @@ class _ExampleAppState extends State<ExampleApp> {
                 tabs: _tabs,
                 validateFourTabs: true,
                 onTabChanged: (i) => setState(() => _index = i),
+                onDisabledTabTap: _showComingSoonPoster,
                 borderRadius: 0,
               ),
               // ── Body ─────────────────────────────────────────────────────
-              // Page background comes from `_bodyBackgrounds` above — its
-              // own color/gradient per tab, separate from the app bar's
-              // gradient/color and the notch's matching color.
               Expanded(
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 450),
-                  decoration: _bodyBackgrounds[_index],
+                  decoration: _destinations[_index].pageBackground.toBoxDecoration(),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     transitionBuilder: (child, animation) => FadeTransition(
@@ -121,13 +251,9 @@ class _ExampleAppState extends State<ExampleApp> {
                       child: child,
                     ),
                     child: KeyedSubtree(
-                      key: ValueKey(_index),
-                      child: [
-                        const _CoffeeBody(),
-                        const _MallBody(),
-                        const _OffersBody(),
-                        const _PrintBody(),
-                      ][_index],
+                      key: ValueKey(activeKey),
+                      child: _bodiesByKey[activeKey] ??
+                          const SizedBox.shrink(),
                     ),
                   ),
                 ),

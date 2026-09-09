@@ -20,6 +20,12 @@ class AnimatedNotchTopBar extends StatefulWidget {
   /// Called with the new index whenever the user taps a different tab.
   final ValueChanged<int>? onTabChanged;
 
+  /// Called with the tapped index whenever the user taps a tab whose
+  /// [TopBarTab.enabled] is false (e.g. a "coming soon" destination),
+  /// instead of switching to it. Use this to show a poster, dialog, or
+  /// any other app-specific feedback.
+  final ValueChanged<int>? onDisabledTabTap;
+
   /// Optional custom leading widget in the top app bar (e.g. BackButton or Drawer icon).
   final Widget? leading;
 
@@ -110,6 +116,7 @@ class AnimatedNotchTopBar extends StatefulWidget {
     required this.tabs,
     this.initialIndex = 0,
     this.onTabChanged,
+    this.onDisabledTabTap,
     this.leading,
     this.title,
     this.centerTitle = false,
@@ -194,7 +201,7 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
   }
 
   void _selectTab(int index) {
-    if (index == activeIndex) return;
+    if (index == activeIndex || !widget.tabs[index].enabled) return;
     setState(() => activeIndex = index);
     widget.onTabChanged?.call(index);
     WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
@@ -459,33 +466,39 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     final unselectedBg =
         tab.unselectedColor ?? widget.unselectedColor ?? Colors.white;
 
-    return AnimatedContainer(
-      key: _tabKeys[index],
+    return AnimatedOpacity(
       duration: widget.shapeAnimationDuration,
-      curve: Curves.easeInOut,
-      height: widget.tabHeight,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: isActive ? Colors.transparent : unselectedBg,
-        borderRadius: BorderRadius.circular(widget.tabBorderRadius),
-        boxShadow: isActive
-            ? null
-            : const [
-                BoxShadow(
-                  color: Color(0x14000000),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+      opacity: tab.enabled ? 1 : 0.45,
+      child: AnimatedContainer(
+        key: _tabKeys[index],
+        duration: widget.shapeAnimationDuration,
+        curve: Curves.easeInOut,
+        height: widget.tabHeight,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: isActive ? Colors.transparent : unselectedBg,
           borderRadius: BorderRadius.circular(widget.tabBorderRadius),
-          onTap: () => _selectTab(index),
-          child: SizedBox.expand(
-            child: Center(
-              child: content,
+          boxShadow: isActive
+              ? null
+              : const [
+                  BoxShadow(
+                    color: Color(0x14000000),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(widget.tabBorderRadius),
+            onTap: tab.enabled
+                ? () => _selectTab(index)
+                : () => widget.onDisabledTabTap?.call(index),
+            child: SizedBox.expand(
+              child: Center(
+                child: content,
+              ),
             ),
           ),
         ),

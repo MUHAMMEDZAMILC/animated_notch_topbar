@@ -111,6 +111,10 @@ class TopBarTab {
   /// Optional icon/text color when this tab is unselected.
   final Color? unselectedItemColor;
 
+  /// If false, this tab can't be tapped/selected and renders at reduced
+  /// opacity (e.g. for a "coming soon" destination). Defaults to true.
+  final bool enabled;
+
   const TopBarTab({
     this.label = '',
     this.sub,
@@ -123,5 +127,6 @@ class TopBarTab {
     this.unselectedColor,
     this.selectedItemColor,
     this.unselectedItemColor,
+    this.enabled = true,
   });
 }
