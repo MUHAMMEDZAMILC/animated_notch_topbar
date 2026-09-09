@@ -1,3 +1,13 @@
+## 0.0.4
+
+- Location label now renders with proper `Icons.location_on` /
+  `Icons.arrow_drop_down` icons instead of emoji characters.
+- Tab `InkWell` also disables `hoverColor`/`focusColor`, closing the last
+  gap where a lingering highlight could still show (web/desktop or
+  trackpad input).
+- README: richer feature list, author/contact section (LinkedIn, GitHub),
+  and a placeholder slot for a demo GIF.
+
 ## 0.0.3
 
 - Example app: remove press overlay/ripple from the "Learn more" button

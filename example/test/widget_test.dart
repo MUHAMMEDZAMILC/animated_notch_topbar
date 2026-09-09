@@ -14,7 +14,7 @@ import 'package:animated_notch_topbar/animated_notch_topbar.dart';
 void main() {
   testWidgets('ExampleApp smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const ExampleApp());
-    expect(find.text('Hi, Dilshad 👋'), findsOneWidget);
+    expect(find.text('Hi, @master_zing_mz 👋'), findsOneWidget);
     expect(find.byType(AnimatedNotchTopBar), findsOneWidget);
   });
 

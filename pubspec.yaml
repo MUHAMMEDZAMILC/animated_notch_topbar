@@ -2,7 +2,7 @@ name: animated_notch_topbar
 description: >
   A customizable animated top app bar with a sliding notch-style tab
   indicator and per-tab gradient themes.
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/MUHAMMEDZAMILC/animated_notch_topbar
 repository: https://github.com/MUHAMMEDZAMILC/animated_notch_topbar
 issue_tracker: https://github.com/MUHAMMEDZAMILC/animated_notch_topbar/issues

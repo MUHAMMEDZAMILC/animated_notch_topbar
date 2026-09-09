@@ -3,6 +3,13 @@
 An animated top app bar for Flutter with a sliding "notch" pill
 indicator over the active tab and per-tab gradient header themes.
 
+<!--
+TODO: demo GIF — once doc/demo.gif is added, uncomment:
+<p align="center">
+  <img src="doc/demo.gif" alt="animated_notch_topbar demo" width="320">
+</p>
+-->
+
 ## Features
 
 - Sliding notch-cutout indicator that measures real tab widths at
@@ -14,13 +21,15 @@ indicator over the active tab and per-tab gradient header themes.
   `leading`/`title`/`actions`, each independently configurable.
 - Per-tab custom images or widgets for the selected/unselected states.
 - Disabled ("coming soon") tabs with a dedicated tap callback.
+- No tap ripple/highlight/hover artifacts on tab selection — a clean,
+  flat press.
 - Fully driven by data — pass any number of `TopBarTab`s.
 
 ## Getting started
 
 ```yaml
 dependencies:
-  animated_notch_topbar: ^0.0.1
+  animated_notch_topbar: ^0.0.3
 ```
 
 ## Usage
@@ -41,7 +50,10 @@ AnimatedNotchTopBar(
 )
 ```
 
-See `example/lib/main.dart` for a runnable app.
+See `example/lib/main.dart` for a runnable app, including a full
+data-driven setup that maps a `/destinations`-style API response onto
+`TopBarTab`/`TopBarTheme` — see `example/DESTINATIONS_API.md` for that
+response contract.
 
 ## Customizing themes
 
@@ -56,3 +68,10 @@ const myTheme = TopBarTheme(
 
 Issues and PRs welcome at the
 [repository](https://github.com/MUHAMMEDZAMILC/animated_notch_topbar).
+
+## Author
+
+Built and maintained by **Muhammed Zamil C**.
+
+- LinkedIn: [muhammed-zamil-c](https://www.linkedin.com/in/muhammed-zamil-c-4506ab243/)
+- GitHub: [@MUHAMMEDZAMILC](https://github.com/MUHAMMEDZAMILC/)
