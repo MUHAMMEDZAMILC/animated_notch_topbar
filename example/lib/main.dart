@@ -262,7 +262,7 @@ class _HomePageState extends State<_HomePage> {
           children: [
             // ── Top App Bar ──────────────────────────────────────────────
             AnimatedNotchTopBar(
-              greetingName: 'Dilshad',
+              greetingName: '@master_zing_mz',
               locationLabel: 'New York, USA',
               tabs: _tabs,
               validateFourTabs: true,

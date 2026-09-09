@@ -325,7 +325,17 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
                     ? const Color(0xB01E2814)
                     : const Color(0xE6FFFFFF),
               ),
-              child: Text('📍 ${widget.locationLabel} ⌄'),
+              child: Row(
+                children: [
+                  const Icon(Icons.location_on, color: Colors.white, size: 18),
+                  const SizedBox(width: 5),
+                  Text(widget.locationLabel,
+                      style: const TextStyle(fontSize: 16)),
+                  const SizedBox(width: 5),
+                  const Icon(Icons.arrow_drop_down,
+                      color: Colors.white, size: 24),
+                ],
+              ),
             ),
         ],
       ),
