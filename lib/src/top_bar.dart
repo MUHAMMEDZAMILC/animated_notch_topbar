@@ -32,24 +32,28 @@ class AnimatedNotchTopBar extends StatefulWidget {
   /// Optional action widgets displayed on the right of the app bar.
   final List<Widget>? actions;
 
-  /// Background gradient for the whole bar (app bar section + tab section).
-  /// If null, uses the active tab's [TopBarTheme.gradient].
+  /// Background gradient for the whole bar (app bar section + tab section),
+  /// overriding the active tab's [TopBarTheme.gradient].
   final Gradient? gradient;
 
-  /// Background image decoration for the whole bar. Takes precedence over
-  /// [gradient] and [backgroundColor] when set.
+  /// Background image decoration for the whole bar, overriding the active
+  /// tab's [TopBarTheme.backgroundImage]/[TopBarTheme.backgroundImageUrl].
+  /// Takes precedence over [gradient] and [backgroundColor] when set.
   final DecorationImage? backgroundImage;
 
-  /// Background image path or URL for the whole bar. Takes precedence over
-  /// [gradient] and [backgroundColor] when set.
+  /// Background image path or URL for the whole bar, overriding the active
+  /// tab's theme. Takes precedence over [gradient] and [backgroundColor].
   final String? backgroundImageUrl;
 
-  /// Solid background color for the whole bar (used if no gradient or image
-  /// specified). Takes precedence over [gradient] when set.
+  /// Solid background color for the whole bar, overriding the active tab's
+  /// [TopBarTheme.backgroundColor]. Used only if no gradient or image is
+  /// resolved.
   final Color? backgroundColor;
 
   /// Fill color for the notch cutout and active tab background.
-  /// Falls back to active tab's [TopBarTab.selectedColor] or [TopBarTheme.pageBackground].
+  /// Falls back to active tab's [TopBarTab.selectedColor] or
+  /// [TopBarTheme.effectiveNotchColor] (which itself matches the active
+  /// theme's own background — color, gradient, or image).
   final Color? selectedWidgetColor;
 
   /// Background color for unselected tabs.
@@ -204,23 +208,37 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
 
-        final bgImage = _resolveBackgroundImage();
-        final gradient = widget.gradient ??
-            (widget.backgroundColor == null && bgImage == null
-                ? LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: theme.gradient,
-                  )
-                : null);
+        final hasWidgetOverride = widget.backgroundImage != null ||
+            (widget.backgroundImageUrl?.isNotEmpty ?? false) ||
+            widget.gradient != null ||
+            widget.backgroundColor != null;
+
+        final bgImage = hasWidgetOverride
+            ? _resolveImage(widget.backgroundImage, widget.backgroundImageUrl)
+            : _resolveImage(theme.backgroundImage, theme.backgroundImageUrl);
+
+        final gradientColors = hasWidgetOverride ? null : theme.gradient;
+        final gradient = bgImage != null
+            ? null
+            : widget.gradient ??
+                (gradientColors != null
+                    ? LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: gradientColors,
+                      )
+                    : null);
+
+        final color = (bgImage != null || gradient != null)
+            ? null
+            : widget.backgroundColor ??
+                theme.backgroundColor ??
+                theme.pageBackground;
 
         return AnimatedContainer(
           duration: widget.themeAnimationDuration,
           decoration: BoxDecoration(
-            color: widget.backgroundColor ??
-                (gradient == null && bgImage == null
-                    ? theme.pageBackground
-                    : null),
+            color: color,
             image: bgImage,
             gradient: gradient,
             borderRadius: BorderRadius.circular(widget.borderRadius),
@@ -238,11 +256,9 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     );
   }
 
-  DecorationImage? _resolveBackgroundImage() {
-    if (widget.backgroundImage != null) return widget.backgroundImage;
-    if (widget.backgroundImageUrl != null &&
-        widget.backgroundImageUrl!.isNotEmpty) {
-      final url = widget.backgroundImageUrl!;
+  DecorationImage? _resolveImage(DecorationImage? explicit, String? url) {
+    if (explicit != null) return explicit;
+    if (url != null && url.isNotEmpty) {
       if (url.startsWith('http://') || url.startsWith('https://')) {
         return DecorationImage(image: NetworkImage(url), fit: BoxFit.cover);
       }
@@ -360,7 +376,7 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     final activeTab = widget.tabs[activeIndex];
     final notchColor = activeTab.selectedColor ??
         widget.selectedWidgetColor ??
-        theme.pageBackground;
+        theme.effectiveNotchColor;
 
     return SizedBox(
       height: widget.notchHeight,
@@ -440,9 +456,8 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
       }
     }
 
-    final unselectedBg = tab.unselectedColor ??
-        widget.unselectedColor ??
-        (tab.useBrandColor ? tab.brandColor : Colors.white);
+    final unselectedBg =
+        tab.unselectedColor ?? widget.unselectedColor ?? Colors.white;
 
     return AnimatedContainer(
       key: _tabKeys[index],
@@ -487,7 +502,7 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
         Colors.black;
     final inactiveTextColor = tab.unselectedItemColor ??
         widget.unselectedItemColor ??
-        (tab.useBrandColor ? Colors.white : const Color(0xFF1C1C1C));
+        const Color(0xFF1C1C1C);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

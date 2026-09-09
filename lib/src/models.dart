@@ -1,38 +1,70 @@
 import 'package:flutter/material.dart';
 
 /// Visual theme applied to the whole bar while a given [TopBarTab] is
-/// active — gradient header background, page/notch background, status
-/// bar text color, and whether the decorative balloon is shown.
+/// active.
+///
+/// Exactly one background style is used, resolved in this order:
+/// [backgroundImageUrl] (or [backgroundImage]) > [gradient] > [backgroundColor].
+/// Provide whichever one matches the look you want for this theme.
 class TopBarTheme {
-  /// Header background gradient, top-to-bottom.
-  final List<Color> gradient;
+  /// Header + tab-section background gradient, top-to-bottom. Ignored if
+  /// [backgroundImage]/[backgroundImageUrl] is set.
+  final List<Color>? gradient;
 
-  /// Background color of the page / search area / the notch cutout
-  /// behind the active tab. Usually the same across all themes.
+  /// Solid header + tab-section background color, used only if neither
+  /// [gradient] nor an image is set.
+  final Color? backgroundColor;
+
+  /// Header + tab-section background image decoration. Takes precedence
+  /// over [backgroundImageUrl] if both are set.
+  final DecorationImage? backgroundImage;
+
+  /// Header + tab-section background image path or URL. Takes precedence
+  /// over [gradient] and [backgroundColor].
+  final String? backgroundImageUrl;
+
+  /// Background color of the page / search area behind the active tab.
+  /// Usually the same across all themes.
   final Color pageBackground;
 
-  /// If true, status bar and greeting text render in dark color
-  /// (use for light gradients like mint/amber). Defaults to false
-  /// (white text), suited to darker gradients.
+  /// Solid color applied to the selected notch cutout / active tab
+  /// background. If null, it is derived from this theme's own background
+  /// ([backgroundColor], or the first [gradient] color, or [pageBackground])
+  /// so the notch always matches whatever background style this theme uses.
+  final Color? notchColor;
+
+  /// If true, greeting/title text renders in dark color (use for light
+  /// backgrounds like mint/amber). Defaults to false (white text), suited
+  /// to darker backgrounds.
   final bool useDarkForeground;
 
-  /// If true, shows the decorative balloon illustration in the
-  /// top-right corner of the header while this theme is active.
-  final bool showBalloon;
-
   const TopBarTheme({
-    required this.gradient,
+    this.gradient,
+    this.backgroundColor,
+    this.backgroundImage,
+    this.backgroundImageUrl,
     this.pageBackground = const Color(0xFFFDFAF6),
+    this.notchColor,
     this.useDarkForeground = false,
-    this.showBalloon = false,
-  });
+  }) : assert(
+          gradient != null ||
+              backgroundColor != null ||
+              backgroundImage != null ||
+              backgroundImageUrl != null,
+          'TopBarTheme requires one of gradient, backgroundColor, backgroundImage, or backgroundImageUrl',
+        );
+
+  /// The effective solid color for the notch/active-tab background:
+  /// [notchColor] if set, otherwise derived from this theme's own
+  /// background so it always matches.
+  Color get effectiveNotchColor =>
+      notchColor ?? backgroundColor ?? gradient?.first ?? pageBackground;
 
   static const green = TopBarTheme(
     gradient: [Color(0xFF8FBF9A), Color(0xFFA9D0AF)],
   );
   static const purple = TopBarTheme(
     gradient: [Color(0xFF6C5CE0), Color(0xFF8A78E8)],
-    showBalloon: true,
   );
   static const mint = TopBarTheme(
     gradient: [Color(0xFFEAF4D8), Color(0xFFD8ECC4)],
@@ -54,14 +86,6 @@ class TopBarTab {
 
   /// Theme applied to the whole bar while this tab is active.
   final TopBarTheme theme;
-
-  /// If true, renders this tab with a solid brand-colored pill
-  /// (see [brandColor]) instead of white, when inactive.
-  final bool useBrandColor;
-
-  /// Fill color used when [useBrandColor] is true and the tab is
-  /// inactive. Defaults to a blue accent.
-  final Color brandColor;
 
   /// Image path or URL displayed when the tab is unselected (rendered with BoxFit.cover).
   final String? unselectedImage;
@@ -91,8 +115,6 @@ class TopBarTab {
     this.label = '',
     this.sub,
     required this.theme,
-    this.useBrandColor = false,
-    this.brandColor = const Color(0xFF2B1FF0),
     this.unselectedImage,
     this.selectedImage,
     this.unselectedWidget,

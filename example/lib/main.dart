@@ -17,33 +17,72 @@ class ExampleApp extends StatefulWidget {
 class _ExampleAppState extends State<ExampleApp> {
   int _index = 0;
 
+  // Each tab's theme picks a different background style — gradient or
+  // solid color — to show that the notch (and now the page body below)
+  // always resolves its own color to match, whichever style is used.
   static const _tabs = [
     TopBarTab(
       label: 'COFFEE LABS',
-      theme: TopBarTheme.green,
+      theme: TopBarTheme(
+        gradient: [Color(0xFF8FBF9A), Color(0xFFA9D0AF)],
+      ),
+      selectedColor: Color(0xFFEFF8E6),
       unselectedImage: 'assets/coffee_cover.png',
       selectedImage: 'assets/coffee_selected.png',
     ),
     TopBarTab(
       label: 'Super Mall',
-      theme: TopBarTheme.purple,
-      useBrandColor: true,
+      theme: TopBarTheme(
+        backgroundColor: Color.fromARGB(255, 92, 224, 107),
+      ),
+      selectedColor: Color(0xFFF1FBF2),
       unselectedImage: 'assets/mall_cover.png',
       selectedImage: 'assets/mall_selected.png',
     ),
     TopBarTab(
       label: '50%',
       sub: 'OFF ZONE',
-      theme: TopBarTheme.mint,
+      theme: TopBarTheme(
+        gradient: [Color(0xFFEAF4D8), Color(0xFFD8ECC4)],
+        useDarkForeground: true,
+      ),
+      selectedColor: Color(0xFFFFFDF6),
       unselectedImage: 'assets/offers_cover.png',
       selectedImage: 'assets/offers_selected.png',
     ),
     TopBarTab(
       label: 'Make a Print',
-      theme: TopBarTheme.amber,
+      theme: TopBarTheme(
+        backgroundColor: Color(0xFFF3DDB0),
+        useDarkForeground: true,
+      ),
+      selectedColor: Color(0xFFFDF6EA),
       unselectedImage: 'assets/print_cover.png',
       selectedImage: 'assets/print_selected.png',
     ),
+  ];
+
+  // Body backgrounds are defined here in the app, independently from the
+  // AnimatedNotchTopBar's own gradient/color/notch — so the page below the
+  // bar can use its own color or gradient per tab instead of automatically
+  // matching the bar.
+  static const _bodyBackgrounds = <BoxDecoration>[
+    BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFFEFF8E6), Color(0xFFDDEFCB)],
+      ),
+    ),
+    BoxDecoration(color: Color(0xFFF1FBF2)),
+    BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFFFFFDF6), Color(0xFFFBF6E4)],
+      ),
+    ),
+    BoxDecoration(color: Color(0xFFFDF6EA)),
   ];
 
   @override
@@ -55,7 +94,6 @@ class _ExampleAppState extends State<ExampleApp> {
             ? SystemUiOverlayStyle.dark
             : SystemUiOverlayStyle.light,
         child: Scaffold(
-          backgroundColor: const Color(0xFFFDFAF6),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -69,21 +107,28 @@ class _ExampleAppState extends State<ExampleApp> {
                 borderRadius: 0,
               ),
               // ── Body ─────────────────────────────────────────────────────
+              // Page background comes from `_bodyBackgrounds` above — its
+              // own color/gradient per tab, separate from the app bar's
+              // gradient/color and the notch's matching color.
               Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (child, animation) => FadeTransition(
-                    opacity: animation,
-                    child: child,
-                  ),
-                  child: KeyedSubtree(
-                    key: ValueKey(_index),
-                    child: [
-                      const _CoffeeBody(),
-                      const _MallBody(),
-                      const _OffersBody(),
-                      const _PrintBody(),
-                    ][_index],
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 450),
+                  decoration: _bodyBackgrounds[_index],
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                    child: KeyedSubtree(
+                      key: ValueKey(_index),
+                      child: [
+                        const _CoffeeBody(),
+                        const _MallBody(),
+                        const _OffersBody(),
+                        const _PrintBody(),
+                      ][_index],
+                    ),
                   ),
                 ),
               ),
@@ -249,7 +294,8 @@ class _CoffeeChip extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: const [
-          BoxShadow(color: Color(0x10000000), blurRadius: 8, offset: Offset(0, 2)),
+          BoxShadow(
+              color: Color(0x10000000), blurRadius: 8, offset: Offset(0, 2)),
         ],
       ),
       child: Column(
@@ -260,7 +306,9 @@ class _CoffeeChip extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-                fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF1C1C1C)),
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1C1C1C)),
           ),
         ],
       ),
@@ -285,14 +333,15 @@ class _DrinkCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(18)),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(18)),
       child: Row(
         children: [
           Container(
             width: 58,
             height: 58,
-            decoration:
-                BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(
+                color: Colors.white, borderRadius: BorderRadius.circular(14)),
             alignment: Alignment.center,
             child: Text(emoji, style: const TextStyle(fontSize: 28)),
           ),
@@ -303,10 +352,13 @@ class _DrinkCard extends StatelessWidget {
               children: [
                 Text(name,
                     style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF1C1C1C))),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1C1C1C))),
                 const SizedBox(height: 3),
                 Text(desc,
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF6B665C))),
+                    style: const TextStyle(
+                        fontSize: 12, color: Color(0xFF6B665C))),
               ],
             ),
           ),
@@ -316,16 +368,21 @@ class _DrinkCard extends StatelessWidget {
             children: [
               Text(price,
                   style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF1C1C1C))),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1C1C1C))),
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                     color: const Color(0xFF1C1C1C),
                     borderRadius: BorderRadius.circular(8)),
                 child: const Text('Add',
                     style: TextStyle(
-                        fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white)),
               ),
             ],
           ),
@@ -366,14 +423,17 @@ class _MallBody extends StatelessWidget {
                             color: Colors.white)),
                     SizedBox(height: 4),
                     Text('Up to 40% off selected items',
-                        style: TextStyle(fontSize: 12, color: Color(0xDDFFFFFF))),
+                        style:
+                            TextStyle(fontSize: 12, color: Color(0xDDFFFFFF))),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                 decoration: BoxDecoration(
-                    color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10)),
                 child: const Text('Shop Now',
                     style: TextStyle(
                         fontSize: 12,
@@ -410,12 +470,26 @@ class _MallBody extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: const [
-              _TrendCard(emoji: '📱', name: 'iPhone 16 Pro', price: r'$999', tag: '🔥 Hot'),
-              _TrendCard(emoji: '👟', name: 'Air Max 2025', price: r'$189', tag: '⚡ New'),
               _TrendCard(
-                  emoji: '🎧', name: 'AirPods Ultra', price: r'$299', tag: '💜 Top Pick'),
+                  emoji: '📱',
+                  name: 'iPhone 16 Pro',
+                  price: r'$999',
+                  tag: '🔥 Hot'),
               _TrendCard(
-                  emoji: '⌚', name: 'Galaxy Watch 7', price: r'$349', tag: '🌟 Popular'),
+                  emoji: '👟',
+                  name: 'Air Max 2025',
+                  price: r'$189',
+                  tag: '⚡ New'),
+              _TrendCard(
+                  emoji: '🎧',
+                  name: 'AirPods Ultra',
+                  price: r'$299',
+                  tag: '💜 Top Pick'),
+              _TrendCard(
+                  emoji: '⌚',
+                  name: 'Galaxy Watch 7',
+                  price: r'$349',
+                  tag: '🌟 Popular'),
             ],
           ),
         ),
@@ -433,7 +507,8 @@ class _MallCat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(14)),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(14)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -441,7 +516,9 @@ class _MallCat extends StatelessWidget {
           const SizedBox(height: 6),
           Text(label,
               style: const TextStyle(
-                  fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1C1C1C))),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1C1C1C))),
         ],
       ),
     );
@@ -469,7 +546,8 @@ class _TrendCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: const [
-          BoxShadow(color: Color(0x0E000000), blurRadius: 10, offset: Offset(0, 3)),
+          BoxShadow(
+              color: Color(0x0E000000), blurRadius: 10, offset: Offset(0, 3)),
         ],
       ),
       child: Column(
@@ -478,15 +556,22 @@ class _TrendCard extends StatelessWidget {
           Text(emoji, style: const TextStyle(fontSize: 36)),
           const Spacer(),
           Text(tag,
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF9A9488))),
+              style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF9A9488))),
           const SizedBox(height: 2),
           Text(name,
               style: const TextStyle(
-                  fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF1C1C1C))),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1C1C1C))),
           const SizedBox(height: 4),
           Text(price,
               style: const TextStyle(
-                  fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF6C5CE0))),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF6C5CE0))),
         ],
       ),
     );
@@ -523,7 +608,8 @@ class _OffersBody extends StatelessWidget {
                             color: Color(0xFF2E6B3E))),
                     SizedBox(height: 3),
                     Text('Limited time only!',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF5A8A6A))),
+                        style:
+                            TextStyle(fontSize: 12, color: Color(0xFF5A8A6A))),
                   ],
                 ),
               ),
@@ -632,7 +718,8 @@ class _DealCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(18)),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(18)),
       child: Row(
         children: [
           Text(emoji, style: const TextStyle(fontSize: 38)),
@@ -643,7 +730,9 @@ class _DealCard extends StatelessWidget {
               children: [
                 Text(name,
                     style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF1C1C1C))),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1C1C1C))),
                 const SizedBox(height: 4),
                 Row(
                   children: [
@@ -670,7 +759,9 @@ class _DealCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10)),
             child: Text(discount,
                 style: const TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white)),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white)),
           ),
         ],
       ),
@@ -774,7 +865,8 @@ class _PrintType extends StatelessWidget {
   final String emoji;
   final String label;
   final String sub;
-  const _PrintType({required this.emoji, required this.label, required this.sub});
+  const _PrintType(
+      {required this.emoji, required this.label, required this.sub});
 
   @override
   Widget build(BuildContext context) {
@@ -800,7 +892,8 @@ class _PrintType extends StatelessWidget {
                       color: Color(0xFF5C4A1E))),
               const SizedBox(height: 2),
               Text(sub,
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF8A6C2E))),
+                  style:
+                      const TextStyle(fontSize: 11, color: Color(0xFF8A6C2E))),
             ],
           ),
         ],
@@ -828,7 +921,8 @@ class _OrderItem extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: const [
-          BoxShadow(color: Color(0x0A000000), blurRadius: 8, offset: Offset(0, 2)),
+          BoxShadow(
+              color: Color(0x0A000000), blurRadius: 8, offset: Offset(0, 2)),
         ],
       ),
       child: Row(
@@ -846,7 +940,8 @@ class _OrderItem extends StatelessWidget {
                         color: Color(0xFF1C1C1C))),
                 const SizedBox(height: 2),
                 Text(date,
-                    style: const TextStyle(fontSize: 11, color: Color(0xFF8A8A8A))),
+                    style: const TextStyle(
+                        fontSize: 11, color: Color(0xFF8A8A8A))),
               ],
             ),
           ),
