@@ -199,3 +199,89 @@ void _showComingSoonPoster(int index) {
       broken-image flash.
 - [ ] Re-open the same tab twice → `CachedNetworkImage` doesn't re-fetch
       (verify via network inspector).
+
+## 9. Upgrading an existing integration — gradient notch support
+
+If your app **already** imports this package and already has its own
+`destinationToTab`-equivalent (built from an earlier version of this
+plan), only the notch fill changed — nothing else in the response shape
+or the rest of the mapping needs to move.
+
+### What's new
+
+- `TopBarTab.selectedGradient` (`List<Color>?`) — new field. When set
+  (≥2 colors), it paints the notch/active-tab-pill as a top-to-bottom
+  gradient instead of a flat fill, and takes precedence over
+  `selectedColor`.
+- `AnimatedNotchTopBar.selectedWidgetGradient` (`List<Color>?`) — the
+  widget-level override counterpart to the existing
+  `selectedWidgetColor`, for when you want to force one gradient across
+  every tab rather than per-tab.
+- `NotchPainter` now accepts an optional `gradient` and uses it (via
+  `Paint.shader`) instead of `color` when present — internal, no call
+  site changes needed unless you use `NotchPainter` directly.
+
+### Step 1 — bump the dependency
+
+```yaml
+dependencies:
+  animated_notch_topbar: ^0.0.8
+```
+
+### Step 2 — response structure: no shape change, just stop ignoring it
+
+The `tabBackground` object your backend already sends
+(`{type, colors, angle, image, mediaType}`) already carries everything
+needed — nothing new to add server-side. The gap was purely client-side:
+your mapping function was only ever reading `tabBackground.colors[0]`
+(the solid color) and silently dropping the rest of `colors` whenever
+`type` was `"gradient"`. Solid `tabBackground`s (`type: "solid"`, one
+color) keep working exactly as before — this is additive, not breaking.
+
+### Step 3 — update your `TopBarTab` construction (the "theme set")
+
+Find the line that currently does:
+
+```dart
+selectedColor: d.tabBackground.solidColor,
+```
+
+and add the gradient alongside it:
+
+```dart
+selectedColor: d.tabBackground.solidColor,
+selectedGradient: d.tabBackground.isGradient ? d.tabBackground.colors : null,
+```
+
+If your `TabBackground` model doesn't already expose `isGradient`, add:
+
+```dart
+bool get isGradient => type == 'gradient' && colors.length > 1;
+```
+
+(matches `example/lib/destinations.dart`). Everything else in your
+`TopBarTab(...)` construction — `theme`, `unselectedWidget`/
+`selectedWidget`, `enabled`, etc. — is unchanged.
+
+### Known limitation
+
+Unlike `tabRowBackground`/`pageBackground` (which respect the API's
+`angle` field via `toGradient()`), `selectedGradient` always paints
+top-to-bottom regardless of `angle` — the notch is a small pill, so a
+fixed direction was chosen over plumbing an `angle`-aware `Gradient`
+through `TopBarTab`. If your backend sends a non-180° `angle` on
+`tabBackground` expecting it to steer the notch too, it will be ignored;
+only `colors` and `type` matter for the notch.
+
+### Step 4 — testing checklist
+
+- [ ] A destination with `tabBackground.type: "solid"` still shows a flat
+      notch color (regression check).
+- [ ] A destination with `tabBackground.type: "gradient"` and ≥2 `colors`
+      shows a top-to-bottom gradient notch.
+- [ ] A destination with `tabBackground.type: "gradient"` but only 1 color
+      falls back to solid (matches `isGradient`'s `colors.length > 1`
+      guard) — no crash.
+- [ ] Switching between a solid-notch tab and a gradient-notch tab
+      animates without flicker (the notch slide/opacity animation is
+      unaffected by which fill type is active).

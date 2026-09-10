@@ -59,8 +59,17 @@ class AnimatedNotchTopBar extends StatefulWidget {
   /// Fill color for the notch cutout and active tab background.
   /// Falls back to active tab's [TopBarTab.selectedColor] or
   /// [TopBarTheme.effectiveNotchColor] (which itself matches the active
-  /// theme's own background — color, gradient, or image).
+  /// theme's own background — color, gradient, or image). Ignored if
+  /// [selectedWidgetGradient] (or the active tab's own
+  /// [TopBarTab.selectedGradient]) resolves to a gradient.
   final Color? selectedWidgetColor;
+
+  /// Fill gradient for the notch cutout and active tab background,
+  /// top-to-bottom. Falls back to the active tab's own
+  /// [TopBarTab.selectedGradient]. Needs at least 2 colors to paint as a
+  /// gradient; takes precedence over [selectedWidgetColor]/
+  /// [TopBarTab.selectedColor] when set.
+  final List<Color>? selectedWidgetGradient;
 
   /// Background color for unselected tabs.
   /// Falls back to tab's [TopBarTab.unselectedColor] or brand color / white.
@@ -126,6 +135,7 @@ class AnimatedNotchTopBar extends StatefulWidget {
     this.backgroundImageUrl,
     this.backgroundColor,
     this.selectedWidgetColor,
+    this.selectedWidgetGradient,
     this.unselectedColor,
     this.selectedItemColor,
     this.unselectedItemColor,
@@ -394,6 +404,15 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     final notchColor = activeTab.selectedColor ??
         widget.selectedWidgetColor ??
         theme.effectiveNotchColor;
+    final notchGradientColors =
+        activeTab.selectedGradient ?? widget.selectedWidgetGradient;
+    final notchGradient = (notchGradientColors?.length ?? 0) > 1
+        ? LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: notchGradientColors!,
+          )
+        : null;
 
     return SizedBox(
       height: widget.notchHeight,
@@ -411,6 +430,7 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
             child: CustomPaint(
               painter: NotchPainter(
                 color: notchColor,
+                gradient: notchGradient,
                 cornerRadius: widget.notchCornerRadius,
               ),
               child: SizedBox(

@@ -100,7 +100,13 @@ class TopBarTab {
   final Widget? selectedWidget;
 
   /// Optional background color when this tab is selected (notch cutout fill).
+  /// Ignored if [selectedGradient] is set.
   final Color? selectedColor;
+
+  /// Optional background gradient when this tab is selected (notch cutout
+  /// fill), top-to-bottom. Needs at least 2 colors to paint as a gradient;
+  /// takes precedence over [selectedColor] when set.
+  final List<Color>? selectedGradient;
 
   /// Optional background color when this tab is unselected.
   final Color? unselectedColor;
@@ -124,6 +130,7 @@ class TopBarTab {
     this.unselectedWidget,
     this.selectedWidget,
     this.selectedColor,
+    this.selectedGradient,
     this.unselectedColor,
     this.selectedItemColor,
     this.unselectedItemColor,

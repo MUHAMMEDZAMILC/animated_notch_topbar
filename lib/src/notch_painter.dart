@@ -5,14 +5,22 @@ import 'package:flutter/material.dart';
 /// CSS radial-gradient cutout look.
 class NotchPainter extends CustomPainter {
   final Color color;
+  final Gradient? gradient;
   final double cornerRadius;
 
-  const NotchPainter({required this.color, this.cornerRadius = 9.62});
+  const NotchPainter({
+    required this.color,
+    this.gradient,
+    this.cornerRadius = 9.62,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final r = cornerRadius;
-    final paint = Paint()..color = color;
+    final rect = Offset.zero & size;
+    final paint = gradient != null
+        ? (Paint()..shader = gradient!.createShader(rect))
+        : (Paint()..color = color);
     final path = Path()
       ..moveTo(0, r)
       ..arcToPoint(Offset(r, 0), radius: Radius.circular(r))
@@ -36,7 +44,9 @@ class NotchPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant NotchPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.cornerRadius != cornerRadius;
+      oldDelegate.color != color ||
+      oldDelegate.gradient != gradient ||
+      oldDelegate.cornerRadius != cornerRadius;
 }
 
 /// Simple two-balloon decorative illustration used in the header.

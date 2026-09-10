@@ -23,8 +23,8 @@ const _destinationsApiResponse = '''
       "label": "Home",
       "order": 0,
       "tabBackground": {
-        "type": "solid",
-        "colors": ["#EFF8E6"],
+        "type": "gradient",
+        "colors": ["#8FBF9A", "#A9D0AF"],
         "angle": 180,
         "image": null,
         "mediaType": "image"

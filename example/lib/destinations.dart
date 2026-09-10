@@ -175,7 +175,10 @@ class Destination {
 /// - [Destination.tabRowBackground] (the bar's overall background for this
 ///   destination) becomes the [TopBarTheme]'s gradient/color/image.
 /// - [Destination.tabBackground] (the individual tab's own background)
-///   becomes the tab's [TopBarTab.selectedColor] (notch fill).
+///   becomes the tab's notch fill: [TopBarTab.selectedColor] for a
+///   `"solid"` background, or [TopBarTab.selectedGradient] (which takes
+///   precedence) for a `"gradient"` one — matching whichever [type] the
+///   API sent for that destination's `tabBackground`.
 /// - [Destination.isComingSoon] disables the tab ([TopBarTab.enabled]) and
 ///   shows a "Coming soon" sub-label.
 /// - [Destination.unselectedImage]/[Destination.selectedImage] decide
@@ -202,6 +205,8 @@ TopBarTab destinationToTab(Destination d) {
     sub: d.isComingSoon ? 'Coming soon' : null,
     theme: theme,
     selectedColor: d.tabBackground.solidColor,
+    selectedGradient:
+        d.tabBackground.isGradient ? d.tabBackground.colors : null,
     unselectedImage: unselectedImage,
     selectedImage: selectedImage,
     enabled: d.isActive,

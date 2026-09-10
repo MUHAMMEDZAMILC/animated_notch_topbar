@@ -1,3 +1,16 @@
+## 0.0.8
+
+- Add gradient support for the notch/active-tab-pill fill:
+  - `TopBarTab.selectedGradient` (`List<Color>?`) — takes precedence
+    over `selectedColor` when set with 2+ colors.
+  - `AnimatedNotchTopBar.selectedWidgetGradient` (`List<Color>?`) — the
+    widget-level override counterpart to `selectedWidgetColor`.
+  - `NotchPainter` paints with a top-to-bottom gradient shader when one
+    is provided, falling back to a solid color otherwise.
+- Example app: `destinationToTab` now maps a `tabBackground.type:
+  "gradient"` destination onto `selectedGradient` instead of silently
+  collapsing it to its first color.
+
 ## 0.0.7
 
 - README: screenshots still didn't render with relative Markdown image
