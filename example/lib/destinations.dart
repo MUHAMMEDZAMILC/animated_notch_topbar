@@ -122,6 +122,13 @@ class Destination {
   /// provide one.
   final String? posterUrl;
 
+  /// Opacity this tab renders at while [isComingSoon] is true. Null means
+  /// "use the bar's own default" ([AnimatedNotchTopBar.disabledOpacity]);
+  /// send `1` here to keep a specific coming-soon destination at full
+  /// opacity instead of the usual dimmed look. Ignored while
+  /// [isComingSoon] is false.
+  final double? comingSoonOpacity;
+
   const Destination({
     required this.id,
     required this.key,
@@ -134,6 +141,7 @@ class Destination {
     required this.tabRowBackground,
     required this.pageBackground,
     this.posterUrl,
+    this.comingSoonOpacity,
   });
 
   /// Whether this destination is currently selectable (the inverse of
@@ -159,6 +167,7 @@ class Destination {
           : TabBackground.fromJson(
               json['tabRowBackground'] as Map<String, dynamic>),
       posterUrl: json['posterUrl'] as String?,
+      comingSoonOpacity: (json['comingSoonOpacity'] as num?)?.toDouble(),
     );
   }
 
@@ -180,7 +189,10 @@ class Destination {
 ///   precedence) for a `"gradient"` one — matching whichever [type] the
 ///   API sent for that destination's `tabBackground`.
 /// - [Destination.isComingSoon] disables the tab ([TopBarTab.enabled]) and
-///   shows a "Coming soon" sub-label.
+///   shows a "Coming soon" sub-label. [Destination.comingSoonOpacity]
+///   becomes [TopBarTab.disabledOpacity] — null keeps the bar's own
+///   default dimmed look ([AnimatedNotchTopBar.disabledOpacity]), while a
+///   value (e.g. `1`) overrides it for just this destination.
 /// - [Destination.unselectedImage]/[Destination.selectedImage] decide
 ///   whether the tab renders as an icon or as text — never both. If either
 ///   image is set, the tab shows images in both states (missing one falls
@@ -210,6 +222,7 @@ TopBarTab destinationToTab(Destination d) {
     unselectedImage: unselectedImage,
     selectedImage: selectedImage,
     enabled: d.isActive,
+    disabledOpacity: d.comingSoonOpacity,
   );
 }
 

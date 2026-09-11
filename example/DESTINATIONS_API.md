@@ -81,6 +81,7 @@ backgrounds. It matches `lib/destinations.dart` and `lib/main.dart` exactly.
       "label": "Make a Print",
       "order": 3,
       "posterUrl": "https://cdn.example.com/posters/make-a-print.jpg",
+      "comingSoonOpacity": 1,
       "tabBackground": { "type": "solid", "colors": ["#FFFFFF"], "angle": 180, "image": null, "mediaType": "image" },
       "tabRowBackground": { "type": "solid", "colors": ["#FFFFFF"], "angle": 180, "image": null, "mediaType": "image" },
       "pageBackground": {
@@ -115,6 +116,7 @@ backgrounds. It matches `lib/destinations.dart` and `lib/main.dart` exactly.
 | `label` | string | yes | Tab's visible text (only shown if no icon images are set) and always the title in the "`label` is coming soon!" bottom sheet message. |
 | `order` | int | yes | Sort key for left-to-right tab position. Doesn't need to be contiguous. |
 | `posterUrl` | string / `null` | no | Image shown full-width in the bottom sheet opened by tapping a coming-soon tab. `null` → a placeholder hourglass icon is shown instead. Only meaningful when `isComingSoon: true`. |
+| `comingSoonOpacity` | number / `null` | no | Opacity (0–1) this tab renders at while `isComingSoon: true`. `null` → use the bar's own default (~45%). Send `1` to keep a specific coming-soon destination at full opacity instead of dimmed. Only meaningful when `isComingSoon: true`. |
 | `tabBackground` | [background object](#background-object) | yes | Fill color of the selected tab's pill/notch — the small highlight shape behind the active tab's icon/label. |
 | `tabRowBackground` | [background object](#background-object) | yes | The whole top app bar background — behind the greeting text, location, and the full row of tab pills. |
 | `pageBackground` | [background object](#background-object) | yes (falls back to `tabRowBackground` if omitted, for back-compat) | Background of the scrollable page content below the bar for this tab. Independent of `tabRowBackground` — they don't have to match. |

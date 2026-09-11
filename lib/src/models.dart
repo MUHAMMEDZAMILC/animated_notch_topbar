@@ -121,6 +121,14 @@ class TopBarTab {
   /// opacity (e.g. for a "coming soon" destination). Defaults to true.
   final bool enabled;
 
+  /// Opacity this tab renders at while [enabled] is false. Overrides
+  /// [AnimatedNotchTopBar.disabledOpacity] for this tab only — set to `1`
+  /// to keep a disabled tab at full opacity (e.g. only some "coming soon"
+  /// destinations should look dimmed). Falls back to
+  /// [AnimatedNotchTopBar.disabledOpacity] when null. Ignored while
+  /// [enabled] is true.
+  final double? disabledOpacity;
+
   const TopBarTab({
     this.label = '',
     this.sub,
@@ -135,5 +143,6 @@ class TopBarTab {
     this.selectedItemColor,
     this.unselectedItemColor,
     this.enabled = true,
+    this.disabledOpacity,
   });
 }

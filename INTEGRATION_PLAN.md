@@ -9,7 +9,7 @@ using `CachedNetworkImage` instead of the package's built-in `Image.network`.
 
 ```yaml
 dependencies:
-  animated_notch_topbar: ^0.0.1
+  animated_notch_topbar: ^0.0.9
   cached_network_image: ^3.4.1   # likely already present
 ```
 
@@ -225,7 +225,7 @@ or the rest of the mapping needs to move.
 
 ```yaml
 dependencies:
-  animated_notch_topbar: ^0.0.8
+  animated_notch_topbar: ^0.0.9
 ```
 
 ### Step 2 — response structure: no shape change, just stop ignoring it

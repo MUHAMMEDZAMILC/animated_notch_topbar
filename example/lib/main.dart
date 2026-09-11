@@ -114,6 +114,7 @@ const _destinationsApiResponse = '''
       "label": "Make a Print",
       "order": 3,
       "posterUrl": "assets/print_cover.png",
+      "comingSoonOpacity": 1,
       "tabBackground": {
         "type": "solid",
         "colors": ["#FFFFFF"],

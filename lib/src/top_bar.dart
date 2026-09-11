@@ -99,6 +99,12 @@ class AnimatedNotchTopBar extends StatefulWidget {
   /// Whether to strictly validate that [tabs] has exactly 4 items.
   final bool validateFourTabs;
 
+  /// Default opacity a disabled tab (`TopBarTab.enabled == false`) renders
+  /// at, e.g. for a "coming soon" destination. Defaults to 0.45. Overridden
+  /// per-tab by [TopBarTab.disabledOpacity] when set — pass `1` there to
+  /// keep a specific disabled tab at full opacity.
+  final double disabledOpacity;
+
   /// Greeting name string displayed if [title] is not provided.
   final String greetingName;
 
@@ -145,6 +151,7 @@ class AnimatedNotchTopBar extends StatefulWidget {
     this.notchCornerRadius = 9.62,
     this.tabBorderRadius = 9.62,
     this.validateFourTabs = false,
+    this.disabledOpacity = 0.45,
     this.greetingName = '',
     this.locationLabel = '',
     this.onLocationTap,
@@ -498,7 +505,8 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
 
     return AnimatedOpacity(
       duration: widget.shapeAnimationDuration,
-      opacity: tab.enabled ? 1 : 0.45,
+      opacity:
+          tab.enabled ? 1 : (tab.disabledOpacity ?? widget.disabledOpacity),
       child: AnimatedContainer(
         key: _tabKeys[index],
         duration: widget.shapeAnimationDuration,

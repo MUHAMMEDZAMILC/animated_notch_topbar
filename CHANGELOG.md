@@ -1,3 +1,21 @@
+## 0.0.9
+
+- Fix a dark/near-black flash on unselected tabs: the card's box-shadow
+  (`Color(0x14000000)`) popped in/out abruptly instead of animating, and
+  the tab background color animated toward `Colors.transparent` — whose
+  RGB is black — causing `Color.lerp` to pass through a translucent
+  near-black tint mid-transition. Box-shadow removed; the color now
+  fades to the same color at zero alpha instead.
+- Add `disabledOpacity` for controlling how dimmed a disabled ("coming
+  soon") tab renders:
+  - `AnimatedNotchTopBar.disabledOpacity` (`double`, default `0.45`) —
+    bar-wide default.
+  - `TopBarTab.disabledOpacity` (`double?`) — per-tab override, e.g.
+    pass `1` to keep one coming-soon destination at full opacity while
+    others stay dimmed.
+- Example app: `Destination.comingSoonOpacity` (from the API's new
+  `comingSoonOpacity` field) now maps onto `TopBarTab.disabledOpacity`.
+
 ## 0.0.8
 
 - Add gradient support for the notch/active-tab-pill fill:
