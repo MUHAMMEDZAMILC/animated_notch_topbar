@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:animated_notch_topbar/animated_notch_topbar.dart';
 
@@ -170,6 +171,44 @@ class _HomePage extends StatefulWidget {
 class _HomePageState extends State<_HomePage> {
   int _index = 0;
 
+  // ── Sliver-style scroll behaviour ───────────────────────────────────────────
+  // A single controller is reused across all tab bodies.
+  // We read userScrollDirection from the scroll position — the same signal
+  // Flutter's own SliverAppBar uses — so:
+  //   • ScrollDirection.reverse  = user scrolling DOWN  → hide header
+  //   • ScrollDirection.forward  = user scrolling UP    → show header
+  //   • ScrollDirection.idle     = momentum / fling     → do nothing
+  // This completely avoids the delta-comparison flickering problem.
+  final ScrollController _scrollController = ScrollController();
+  bool _showHeader = true;
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final direction = _scrollController.position.userScrollDirection;
+    final offset   = _scrollController.offset;
+
+    if (direction == ScrollDirection.reverse && _showHeader && offset > 8) {
+      // User actively scrolling DOWN past 8 px — hide the header.
+      setState(() => _showHeader = false);
+    } else if (direction == ScrollDirection.forward && !_showHeader) {
+      // User actively scrolling UP — show the header immediately.
+      setState(() => _showHeader = true);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   // Parsed once from the (simulated) API response above. Each destination's
   // tabRowBackground/tabBackground/isComingSoon drives the corresponding
   // TopBarTab's theme, notch color, and enabled state — see destinations.dart.
@@ -267,9 +306,20 @@ class _HomePageState extends State<_HomePage> {
               locationLabel: 'New York, USA',
               tabs: _tabs,
               validateFourTabs: true,
-              onTabChanged: (i) => setState(() => _index = i),
+              onTabChanged: (i) {
+                setState(() {
+                  _index = i;
+                  // Always show header when switching tabs
+                  _showHeader = true;
+                });
+                // Jump scroll back to top on tab switch
+                if (_scrollController.hasClients) {
+                  _scrollController.jumpTo(0);
+                }
+              },
               onDisabledTabTap: _showComingSoonPoster,
               borderRadius: 0,
+              showHeader: _showHeader,
             ),
             // ── Body ─────────────────────────────────────────────────────
             Expanded(
@@ -285,7 +335,12 @@ class _HomePageState extends State<_HomePage> {
                   ),
                   child: KeyedSubtree(
                     key: ValueKey(activeKey),
-                    child: _bodiesByKey[activeKey] ?? const SizedBox.shrink(),
+                    child: _bodiesByKey[activeKey] != null
+                        ? _BodyWithController(
+                            scrollController: _scrollController,
+                            child: _bodiesByKey[activeKey]!,
+                          )
+                        : const SizedBox.shrink(),
                   ),
                 ),
               ),
@@ -293,6 +348,29 @@ class _HomePageState extends State<_HomePage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Scroll controller injection
+// Wraps a body widget with a PrimaryScrollController so the shared
+// ScrollController from _HomePageState is used by all primary ListViews
+// inside the body (the default ListView behaviour picks it up automatically).
+// ─────────────────────────────────────────────────────────────────────────────
+class _BodyWithController extends StatelessWidget {
+  final ScrollController scrollController;
+  final Widget child;
+  const _BodyWithController({
+    required this.scrollController,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PrimaryScrollController(
+      controller: scrollController,
+      child: child,
     );
   }
 }

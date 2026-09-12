@@ -126,6 +126,15 @@ class AnimatedNotchTopBar extends StatefulWidget {
   /// Outer border radius of the entire top bar container. Defaults to 36 (or 0 for edge-to-edge).
   final double borderRadius;
 
+  /// Whether to show the header section (greeting + actions).
+  /// When set to [false] the header animates out (collapses to zero height)
+  /// while the tab row stays fully visible — mimicking a [SliverAppBar]
+  /// with floating behaviour. Defaults to [true].
+  final bool showHeader;
+
+  /// Duration of the header show/hide animation. Defaults to 300 ms.
+  final Duration headerAnimationDuration;
+
   const AnimatedNotchTopBar({
     super.key,
     required this.tabs,
@@ -159,6 +168,8 @@ class AnimatedNotchTopBar extends StatefulWidget {
     this.shapeAnimationDuration = const Duration(milliseconds: 400),
     this.themeAnimationDuration = const Duration(milliseconds: 450),
     this.borderRadius = 36,
+    this.showHeader = true,
+    this.headerAnimationDuration = const Duration(milliseconds: 300),
   })  : assert(tabs.length > 0, 'AnimatedNotchTopBar needs at least one tab'),
         assert(
           !validateFourTabs || tabs.length == 4,
@@ -272,6 +283,15 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildHeader(theme),
+              // When the header collapses, slide in the status-bar safe-area
+              // height so the tab row never sits flush against the screen edge.
+              AnimatedContainer(
+                duration: widget.headerAnimationDuration,
+                curve: Curves.easeInOut,
+                height: widget.showHeader
+                    ? 0
+                    : MediaQuery.paddingOf(context).top,
+              ),
               _buildTabbar(theme),
             ],
           ),
@@ -295,9 +315,20 @@ class _AnimatedNotchTopBarState extends State<AnimatedNotchTopBar> {
     final topPadding = MediaQuery.paddingOf(context).top;
     final effectiveTopPadding = topPadding > 0 ? topPadding + 6 : 14.0;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(20, effectiveTopPadding, 20, 14),
-      child: _buildAppBarContent(theme),
+    return AnimatedSize(
+      duration: widget.headerAnimationDuration,
+      curve: Curves.easeInOut,
+      alignment: Alignment.topCenter,
+      child: AnimatedOpacity(
+        duration: widget.headerAnimationDuration,
+        opacity: widget.showHeader ? 1.0 : 0.0,
+        child: widget.showHeader
+            ? Padding(
+                padding: EdgeInsets.fromLTRB(20, effectiveTopPadding, 20, 14),
+                child: _buildAppBarContent(theme),
+              )
+            : const SizedBox.shrink(),
+      ),
     );
   }
 
