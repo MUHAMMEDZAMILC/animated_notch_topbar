@@ -26,7 +26,7 @@ indicator over the active tab and per-tab gradient header themes.
 
 ```yaml
 dependencies:
-  animated_notch_topbar: ^0.0.9
+  animated_notch_topbar: ^0.1.0
 ```
 
 ## Usage

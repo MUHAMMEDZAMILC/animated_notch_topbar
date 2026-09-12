@@ -435,28 +435,28 @@ class _CoffeeBody extends StatelessWidget {
         const SizedBox(height: 20),
         const _SectionTitle(title: "Today's Picks", action: 'See all'),
         const SizedBox(height: 12),
-        _DrinkCard(
+        const _DrinkCard(
           emoji: '☕',
           name: 'Café Americano',
           desc: 'Bold double-shot with hot water',
           price: r'$4.50',
-          bg: const Color(0xFFEAF4D8),
+          bg: Color(0xFFEAF4D8),
         ),
         const SizedBox(height: 12),
-        _DrinkCard(
+        const _DrinkCard(
           emoji: '🥛',
           name: 'Caramel Cloud Latte',
           desc: 'Espresso, steamed milk & caramel drizzle',
           price: r'$5.80',
-          bg: const Color(0xFFFFF3E0),
+          bg: Color(0xFFFFF3E0),
         ),
         const SizedBox(height: 12),
-        _DrinkCard(
+        const _DrinkCard(
           emoji: '🧋',
           name: 'Taro Bubble Tea',
           desc: 'Creamy taro with golden tapioca pearls',
           price: r'$6.20',
-          bg: const Color(0xFFEDE8F8),
+          bg: Color(0xFFEDE8F8),
         ),
         const SizedBox(height: 20),
         Container(
@@ -830,9 +830,9 @@ class _OffersBody extends StatelessWidget {
             color: const Color(0xFFEAF4D8),
             borderRadius: BorderRadius.circular(18),
           ),
-          child: Row(
+          child: const Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -849,7 +849,7 @@ class _OffersBody extends StatelessWidget {
                 ),
               ),
               _TimerBox('02'),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4),
                 child: Text(':',
                     style: TextStyle(
@@ -858,7 +858,7 @@ class _OffersBody extends StatelessWidget {
                         color: Color(0xFF2E6B3E))),
               ),
               _TimerBox('45'),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4),
                 child: Text(':',
                     style: TextStyle(
@@ -873,40 +873,40 @@ class _OffersBody extends StatelessWidget {
         const SizedBox(height: 20),
         const _SectionTitle(title: 'Best Deals', action: 'See all'),
         const SizedBox(height: 12),
-        _DealCard(
+        const _DealCard(
           emoji: '👟',
           name: 'Nike Air Force 1',
           original: r'$150',
           sale: r'$75',
           discount: '-50%',
-          bg: const Color(0xFFEAF4D8),
+          bg: Color(0xFFEAF4D8),
         ),
         const SizedBox(height: 12),
-        _DealCard(
+        const _DealCard(
           emoji: '🎧',
           name: 'Sony WH-1000XM5',
           original: r'$400',
           sale: r'$200',
           discount: '-50%',
-          bg: const Color(0xFFE4F0E4),
+          bg: Color(0xFFE4F0E4),
         ),
         const SizedBox(height: 12),
-        _DealCard(
+        const _DealCard(
           emoji: '💻',
           name: 'MacBook Air M3',
           original: r'$1299',
           sale: r'$649',
           discount: '-50%',
-          bg: const Color(0xFFDEEEDE),
+          bg: Color(0xFFDEEEDE),
         ),
         const SizedBox(height: 12),
-        _DealCard(
+        const _DealCard(
           emoji: '⌚',
           name: 'Apple Watch S10',
           original: r'$399',
           sale: r'$199',
           discount: '-50%',
-          bg: const Color(0xFFEAF4D8),
+          bg: Color(0xFFEAF4D8),
         ),
       ],
     );
@@ -1071,21 +1071,21 @@ class _PrintBody extends StatelessWidget {
         const SizedBox(height: 20),
         const _SectionTitle(title: 'Recent Orders'),
         const SizedBox(height: 12),
-        _OrderItem(
+        const _OrderItem(
           emoji: '🖼️',
           name: 'Family Photo 4×6',
           date: 'Delivered Sep 3',
           status: '✅ Done',
         ),
         const SizedBox(height: 10),
-        _OrderItem(
+        const _OrderItem(
           emoji: '🎨',
           name: 'Canvas 12×16',
           date: 'In transit · Sep 8',
           status: '🚚 Shipping',
         ),
         const SizedBox(height: 10),
-        _OrderItem(
+        const _OrderItem(
           emoji: '📋',
           name: 'Birthday Poster A3',
           date: 'Processing · Sep 8',

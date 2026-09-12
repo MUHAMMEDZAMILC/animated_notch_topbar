@@ -1,3 +1,17 @@
+## 0.1.0
+
+- Add sliver-style scroll collapsible header support:
+  - `AnimatedNotchTopBar.showHeader` (`bool`, default `true`) — controls
+    whether the header area (greeting & action row) is visible. When set to
+    `false`, the header smoothly animates out (collapses height and fades out)
+    while the tab row stays fully visible with safe-area spacing preserved.
+  - `AnimatedNotchTopBar.headerAnimationDuration` (`Duration`, default `300ms`) —
+    duration of the header expand/collapse animation.
+- Example app: integrated scroll listener using `ScrollDirection.reverse`
+  and `ScrollDirection.forward` to automatically collapse the header when
+  scrolling down and reveal it when scrolling up.
+- Code cleanup: resolved const constructor lints in example app.
+
 ## 0.0.9
 
 - Fix a dark/near-black flash on unselected tabs: the card's box-shadow
